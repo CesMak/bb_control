@@ -1,15 +1,15 @@
-clc;
-clear all;
+%clc;
+%clear all;
 
-Parameter_flag = 0; 
+%Parameter_flag = 0; 
 %syms m_K m_W m_A r_K r_W r_A l Theta_K Theta_W Theta_Wxy Theta_A Theta_Axy phi_x phi_x_dot theta_x theta_x_dot T_x g i 
-syms phi_z phi_z_dot phi_x phi_x_dot theta_z theta_z_dot theta_x theta_x_dot T_x T_y T_z T_f 
+%syms phi_z phi_z_dot phi_x phi_x_dot theta_z theta_z_dot theta_x theta_x_dot T_x T_y T_z T_f 
 
-if Parameter_flag == 0
-    Parameters_Zuerich
-else 
-    Parameters_Group
-end
+%if Parameter_flag == 0
+  %  Parameters_Zuerich
+%else 
+%    Parameters_Group
+%end
 
 %% Plane XY 
 
@@ -38,8 +38,17 @@ C_xy=eye(4);
 D_xy=[0;0;0;0];
 
 
+
 %Eigenwerte der Systemmatrix berechnen
 [lambda_xy]=eig(A_xy);
+
+%Steuer- und Beobachtbarkeit überprüfen
+M_S_xy = ctrb(A_xy,B_xy);
+M_B_xy = obsv(A_xy,C_xy);
+
+rank_S_xy = rank(M_S_xy)
+rank_B_xy = rank(M_B_xy)
+
 
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
