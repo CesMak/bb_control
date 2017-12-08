@@ -52,8 +52,8 @@ D_xz = [0;0;0;0];
 M_S_xz = ctrb(A_xz,B_xz);
 M_B_xz = obsv(A_xz,C_xz);
 
-rank_S_xz = rank(M_S_xz)
-rank_B_xz = rank(M_B_xz)
+rank_S_xz = rank(M_S_xz);
+rank_B_xz = rank(M_B_xz);
 
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
@@ -66,7 +66,7 @@ Q_xz = [20 0 0 0;
  [K_xz, S_xz, lamda_xz_closed] = lqr(A_xz, B_xz, Q_xz, R_xz);
  
  %Berechunung Vorfilter
- A_xz_closed = A_xz - B_xz*K_xz; 
- F_xz = (C_xz*inv(-A_xz+B_xz*K_xz)*B_xz); 
+ %A_xz_closed = A_xz - B_xz*K_xz; 
+ %F_xz = (C_xz*inv(-A_xz+B_xz*K_xz)*B_xz); 
  %F_xz = ((C_xz*inv(-A_xz+B_xz*K_xz)*B_xz).^-1).'; 
  
