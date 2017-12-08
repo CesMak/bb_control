@@ -2,7 +2,6 @@
 clc;
 clear all;
 
-
 %% Load Model Parameter
 Parameter_flag = 0; 
 %syms m_K m_W m_A r_K r_W r_A l Theta_K Theta_W Theta_Wxy Theta_A Theta_Axy phi_x phi_x_dot theta_x theta_x_dot T_x g i 

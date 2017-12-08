@@ -52,11 +52,39 @@ rank_B_xy = rank(M_B_xy)
 
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
-Q_xy = [20 0 0 0; 
-        0 100 0 0; 
-        0 0 10 0; 
-        0 0 0 50];
- R_xy = 200;
+%Q_xy = [20 0 0 0; 
+ %       0 100 0 0; 
+  %      0 0 10 0; 
+   %     0 0 0 50];
+ %R_xy = 200;
  
  
- [K_xy, S_xy, lamda_xy_closed] = lqr(A_xy, B_xy, Q_xy, R_xy);
+ %[K_xy, S_xy, lamda_xy_closed] = lqr(A_xy, B_xy, Q_xy, R_xy);
+
+ %% Auslegen P-Regler für theta_z
+ syms k
+ k_s=vpa(f_xy(end,1),4); 
+ k_s=double(subs(k_s,T_z,1));
+ T_v=0.2;
+ T_n1 = 0.1; 
+ T_n2 = 1/12;
+ 
+ 
+ G_reg = tf([T_v^2 2*T_v 1],[T_n1*T_n2 T_n1+T_n2 1]);
+ G_s = tf([k_s],[1 0 0]);
+ 
+ F_o = G_reg*G_s;
+ 
+ F_w = F_o/(1+F_o);
+ 
+ rlocus(F_o)
+ 
+ %--> Gain 3.08e08
+ k_reg = 0.672;
+ 
+
+ 
+ 
+ 
+ 
+ 
