@@ -65,8 +65,3 @@ Q_xz = [20 0 0 0;
  
  [K_xz, S_xz, lamda_xz_closed] = lqr(A_xz, B_xz, Q_xz, R_xz);
  
- %Berechunung Vorfilter
- %A_xz_closed = A_xz - B_xz*K_xz; 
- %F_xz = (C_xz*inv(-A_xz+B_xz*K_xz)*B_xz); 
- %F_xz = ((C_xz*inv(-A_xz+B_xz*K_xz)*B_xz).^-1).'; 
- 
