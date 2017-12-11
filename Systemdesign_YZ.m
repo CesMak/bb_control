@@ -1,17 +1,3 @@
-%clc;
-%clear all;
-
-%Parameter_flag = 1; 
-%syms m_K m_W m_A r_K r_W r_A l Theta_K Theta_W Theta_Wxy Theta_A Theta_Axy phi_x phi_x_dot theta_x theta_x_dot T_x g i 
-%syms phi_z phi_z_dot phi_x phi_x_dot theta_z theta_z_dot theta_x theta_x_dot T_x T_y T_z T_f 
-
-%if Parameter_flag == 0
- %   Parameters_Zuerich
-%else 
- %   Parameters_Group
-%end
-
-
 
 %% Plane YZ- Initialisierung der Massenträgheitsmatrix, Gravitations- und Coriolismatrix
 
@@ -80,8 +66,4 @@ Q_yz = [20 0 0 0;
  
  [K_yz, S_yz, lamda_yz_closed] = lqr(A_yz, B_yz, Q_yz, R_yz);
  
- %Berechunung Vorfilter
- %A_yz_closed = A_yz - B_yz*K_yz; 
- %F_yz = (C_yz*inv(-A_yz+B_yz*K_yz)*B_yz); 
- %F_yz = ((C_yz*inv(-A_yz+B_yz*K_yz)*B_yz).^-1).'; 
  
