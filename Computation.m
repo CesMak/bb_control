@@ -17,7 +17,7 @@ end
 %% Compute Model
 Systemdesign_YZ;
 Systemdesign_XZ;
-%Systemdesign_XY;
+Systemdesign_XY;
 
 % Arbeitspunkte
 x_AP = [0;0;0;0];
