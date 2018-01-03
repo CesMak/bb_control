@@ -253,8 +253,8 @@ v_B = simplify(cross(I_Omega_B, T_BP));
 %
 %Ball 
 %
-%kinetic energy
-Kin_B = 1/2 * m_B * dot(v_B,v_B) + 1/2 * L_Omega_B.' * I_Theta_B * L_Omega_B;
+%kinetic energy 
+Kin_B = simplify(1/2 * m_B * v_B.' * v_B + 1/2 * L_Omega_B.' * I_Theta_B * L_Omega_B);
 %potential energy
 Pot_B = 0;
 
@@ -264,9 +264,9 @@ Pot_B = 0;
 %Body A
 %
 %kinetic energy
-Kin_A = simplify(1/2 * m_AW * dot(v_B,v_B) + m_AW * dot(R_IA*v_B,cross(A_Omega_A, A_T_PG)) + 1/2 * A_Omega_A.' * A_Theta_AW * A_Omega_A);
+Kin_A = simplify(1/2 * m_AW * v_B.' * v_B + m_AW * (R_IA*v_B).' * (cross(A_Omega_A, A_T_PG)) + 1/2 * A_Omega_A.' * A_Theta_AW * A_Omega_A);
 %potential energy
-Pot_A = -m_AW * (R_IA * I_G).' * A_T_PG;
+Pot_A = simplify(-m_AW * (R_IA * I_G).' * A_T_PG);
 
 
 %
@@ -293,7 +293,7 @@ syms T1 T2 T3;
 %TC3 = A_R_MW3*(-T3);
 
 %final equation
-f_NP = (JT1*T1 + JT2*T2 + JT3*T3).';
+f_NP = simplify((JT1*T1 + JT2*T2 + JT3*T3).')
 
 
 %% equation of motion
@@ -303,15 +303,15 @@ f_NP = (JT1*T1 + JT2*T2 + JT3*T3).';
 %-------------------------------------------------------------------------
 
 %Total kinetic energy
-Kin_total = Kin_A + Kin_B + Kin_W1 + Kin_W2 + Kin_W3;
+Kin_total = simplify(Kin_A + Kin_B + Kin_W1 + Kin_W2 + Kin_W3);
 
 %Total potential energy
-Pot_total = Pot_A + Pot_B;
+Pot_total = simplify(Pot_A + Pot_B);
 
 %Langrange II
-L1 = jacobian(Kin_total,q_dot);
-L2 = jacobian(Kin_total,q);
-L3 = jacobian(Pot_total,q);
+L1 = simplify(jacobian(Kin_total,q_dot));
+L2 = simplify(jacobian(Kin_total,q));
+L3 = simplify(jacobian(Pot_total,q));
 
 %syms theta_x(t) theta_x_dot(t) theta_y(t) theta_y_dot(t) theta_z(t) theta_z_dot(t) phi_x(t) phi_x_dot(t) phi_y(t) phi_y_dot(t) T1(t) T2(t) T3(t);
 L1_t = subs(L1 , {theta_x,theta_x_dot,theta_y,theta_y_dot,theta_z,theta_z_dot,phi_x,phi_x_dot,phi_y,phi_y_dot} , {'theta_x(t)','theta_x_dot(t)','theta_y(t)','theta_y_dot(t)','theta_z(t)','theta_z_dot(t)','phi_x(t)','phi_x_dot(t)','phi_y(t)','phi_y_dot(t)'});
@@ -343,7 +343,7 @@ L1_dt = subs(L1_dt,varList_t,varList_ot);
 
 
 
-EQ_Lagrange = L1_dt - L2 + L3 - f_NP == 0;
+EQ_Lagrange = simplify(L1_dt - L2 + L3) == f_NP;
 
 fid = fopen('EQ_Lagrange.txt', 'wt');
 fprintf(fid, '%s\n', char(EQ_Lagrange(1)));
@@ -351,10 +351,10 @@ fclose(fid);
 
 [theta_x_dotdot,theta_y_dotdot,theta_z_dotdot,phi_x_dotdot,phi_y_dotdot] = solve([EQ_Lagrange(1),EQ_Lagrange(2),EQ_Lagrange(3),EQ_Lagrange(4),EQ_Lagrange(5)],varList_dotdot)
 
-% syms x y;
-% f(x,y) = x + y == 2;
-% g(x,y) = x - y == 0;
-% [x,y] = solve([f(x,y),g(x,y)],[x,y])
+syms x y;
+f(x,y) = x + y == 2;
+g(x,y) = x - y == 0;
+[x,y] = solve([f(x,y),g(x,y)],[x,y])
 
 fid = fopen('theta_x_dotdot.txt', 'wt');
 fprintf(fid, '%s\n', char(theta_x_dotdot));
