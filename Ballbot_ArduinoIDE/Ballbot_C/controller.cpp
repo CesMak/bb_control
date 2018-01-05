@@ -5,7 +5,7 @@ sensor_values sen_val = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 float gRes = 2000.0/32768.0;
 
 
-void readIMU(cIMU device)
+void readIMU(cIMU device, dynamixel::PacketHandler *handler)
 {
   //Theta y,x,z in radiands
   sen_val.theta_y_cpoint = convert2radiand(device.rpy[0]);
@@ -18,7 +18,7 @@ void readIMU(cIMU device)
   sen_val.theta_z_dot_cpoint = convert2radiand(device.gyroData[2]*gRes);
 
   //Position of Motor
-    
+  sen_val.psi_  
 
   //Print Angel
  
@@ -47,39 +47,3 @@ float convert2radiand(float val_deg)
   return temp_var;
 };
 
-
-
-//Controller::Controller()
-//{
-  
-//}
-
-//Controller::~Controller()
-//{
-  
-//}
-
-
-//void Controller::readIMU(cIMU imu)
-//{
-  //imu.update();
-
-  //float temp_value_rnd = imu.rpy[0]; 
-
-  
-  
-  //Serial.print(imu.rpy[0]);
-  //Serial.print("\n");
-//};
-
-
-//float Controller::convert2radian(float x) 
-//{
- //return 0;
-//};
-
-
-//float Controller::getPhiValue(float theta, float psi)
-//{  
-  //return 0;
-//};
