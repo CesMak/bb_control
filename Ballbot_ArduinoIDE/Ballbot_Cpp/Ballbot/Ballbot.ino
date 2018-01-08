@@ -1,13 +1,18 @@
 #include "controller.h"
+ 
 
-cIMU    IMU;
+cIMU imu;
+Controller controller;
 HardwareTimer Timer(TIMER_CH1);
 
 
 void setup()
 {
   Serial.begin(115200);
-  IMU.begin();
+
+  imu.begin();
+  controller.init();
+  
   Timer.stop();
   Timer.setPeriod(100000);
   Timer.attachInterrupt(executeController);
@@ -18,13 +23,13 @@ void setup()
 void loop()
 {
 
-  IMU.update();
+  imu.update();
   
 }
 
 void executeController()
 {
-    readIMU(IMU);
+    controller.readIMU(imu);
     
 }
 

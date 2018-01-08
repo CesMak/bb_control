@@ -7,8 +7,33 @@
 #include <MadgwickAHRS.h>
 #include <MPU9250.h>
 #include <MPU9250_REGS.h>
+#include <DynamixelSDK.h>
 
 #define VEL
+
+//Defines for Motor Controll
+#define ADDR_PRO_TORQUE_ENABLE          64                 // Control table address is different in Dynamixel model
+#define ADDR_PRO_GOAL_POSITION          116
+#define ADDR_PRO_PRESENT_POSITION       132
+#define ADDR_LED                        65
+// Protocol version
+#define PROTOCOL_VERSION                2.0                 // See which protocol version is used in the Dynamixel
+
+// Default setting
+#define DXM_ID1                         1                   // Dynamixel ID: 1
+#define DXM_ID2                         2                   // Dynamixel ID: 2
+#define DXM_ID3                         3                   // Dynamixel ID: 3
+#define BAUDRATE                        3000000
+#define DEVICENAME                      "COM3"      // Check which port is being used on your controller
+                                                            // ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
+
+#define TORQUE_ENABLE                   1                   // Value for enabling the torque
+#define TORQUE_DISABLE                  0                   // Value for disabling the torque
+#define DXL_MINIMUM_POSITION_VALUE      100                 // Dynamixel will rotate between this value
+#define DXL_MAXIMUM_POSITION_VALUE      4000                // and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
+#define DXL_MOVING_STATUS_THRESHOLD     20                  // Dynamixel moving status threshold
+#define LED_ENABLE                      1
+#define LED_DISABLE                     0
 
 struct sensor_values{
 
@@ -95,20 +120,9 @@ struct controller_values
 };
 
 
-void readIMU(cIMU device);
+void readIMU(cIMU device, dynamixel::PacketHandler *handler);
 float convert2radiand(float val_deg);
 
-//#class Controller
-//#{
- // public:
-  //#Controller();
-  //#~Controller(); 
-  //#sensor_values sen_val; 
-  //#controller_values ctrl_val; 
-  //#void readIMU(cIMU imu);
-  //#float convert2radian(float x); 
-  //#float getPhiValue(float theta, float psi);  
-//#};
 
 #endif
 
