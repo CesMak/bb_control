@@ -58,16 +58,11 @@ F_w = F_o/(1+F_o);
 rlocus(F_o)
 %  
 %  %--> Gain 3.08e08
-k_reg = 5.32;
+k_reg = 2.98;
  
-b0 = k_reg*(T_n/T_sampl);
-b1 = k_reg*(-1-(2*T_n/T_sampl));
-b2 = k_reg*(1+T_n/T_sampl);
+
  
-A_part = -b0;
-B_part = b0+b1+b2;
-
-
+ 
  
  
  

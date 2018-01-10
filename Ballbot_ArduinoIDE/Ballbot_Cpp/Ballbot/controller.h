@@ -8,8 +8,21 @@
 #include <MPU9250.h>
 #include <MPU9250_REGS.h>
 
+#include "ballbot_motor_driver.h"
+
+#define SAMPL_TIME  100000      // in microseconds
+
+#define A_PBZ       -2.660
+#define ALPHA       PI/4
+#define BETA        PI/3
+#define RK          0.07
+#define RW          0.03
+
+#define DEBUG_SEN
 //#define DEBUG_ANGLE
-#define DEBUG_VELOCITY
+//#define DEBUG_VELOCITY
+//#define DEBUG_PSI
+//#define DEBUG_PSI_DOT
 
 struct sensor_values{
 
@@ -30,7 +43,7 @@ struct sensor_values{
   float theta_x_dot_cpoint; 
   float psi_x_dot_cpoint; 
 
-  //y-Axis
+  //xz planar
   float phi_y_spoint;
   float theta_y_spoint;
   float psi_y_spoint;
@@ -47,7 +60,7 @@ struct sensor_values{
   float theta_y_dot_cpoint; 
   float psi_y_dot_cpoint; 
 
-  //z-Axis
+  //xy planar
   float phi_z_spoint;
   float theta_z_spoint;
   float psi_z_spoint;
@@ -104,9 +117,15 @@ class Controller
   controller_values ctrl_val;
   Controller();
   ~Controller();
-  void init();
-  void readIMU(cIMU sensor);
+  bool init(void);
+  void readIMU(cIMU sensor, BallbotMotorDriver driver);
+  float *computePsiDot(float omega_arr[]);
+  float *computePsi(float psi_dot_arr[]);
+  float *computePhiDot(float psi_dot_arr[]);
+  float *computePhi(float psi_arr[], float theta_arr[]);
   float convert2radiand(float val_deg);
+  float *executeController();
+  float *computeTorque(float curr_torque_arr[]);
   
 };
 
