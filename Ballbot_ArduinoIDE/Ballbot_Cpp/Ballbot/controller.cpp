@@ -18,7 +18,7 @@ Controller::~Controller()
 bool Controller::init(void)
 {
   sen_val = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  ctrl_val = {-3.162,24.8947,-0.5533,7.1600,-3.162,24.8947,-0.5533,7.1600,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
+  ctrl_val = {-3.162,24.8947*FAKT,-0.5533,7.1600*FAKT,-3.162,24.8947*FAKT,-0.5533,7.1600*FAKT,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
   gRes=2000.0/32768.0;
 
   return true;
@@ -26,10 +26,11 @@ bool Controller::init(void)
 
 void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
 {
+  float time_start = millis();
   //Theta y,x,z in radiands
-  //float* current_theta_arr = {convert2radiand(sensor.rpy[1]),convert2radiand(sensor.rpy[0]), convert2radiand(sensor.rpy[2])};
-  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0]);
-  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1]);
+  
+  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0])+0.037;
+  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1])-0.02;
   sen_val.theta_z_cpoint = convert2radiand(sensor.rpy[2]);
   float current_theta_arr[3] = {sen_val.theta_x_cpoint, sen_val.theta_y_cpoint, sen_val.theta_z_cpoint};
 //  sen_val.theta_y_cpoint = current_theta_arr[1];
@@ -79,7 +80,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
  sen_val.psi_z_dot_cpoint = current_psi_dot_arr[2];
 
  //Computation of angle Psi in the Planar Model
- float* current_psi_arr = computePsi(current_psi_dot_arr);
+ float* current_psi_arr = computePsi_new2(current_position);
  sen_val.psi_x_cpoint = current_psi_arr[0];
  sen_val.psi_y_cpoint = current_psi_arr[1];
  sen_val.psi_z_cpoint = current_psi_arr[2]; 
@@ -100,7 +101,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
 
   //Execute Controller
   //Compute Tx,Ty,Tz
-  float* curr_torque_arr = executeController();
+  float* curr_torque_arr = executeController2();
   
   //Execute Torque Conversion
   //Compute T1,T2,T3
@@ -111,9 +112,18 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
 
   //Load to motors
   driver.writeServoConfig(DXM_1_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[0]);
-  driver.writeServoConfig(DXM_2_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[2]); 
-  driver.writeServoConfig(DXM_3_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[1]);  
+  driver.writeServoConfig(DXM_2_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[1]); 
+  driver.writeServoConfig(DXM_3_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[2]);  
+
+
+  float time_end=millis(); 
+
+  float time_duration= time_end - time_start; 
   
+  Serial.print("Time Duration"); 
+  Serial.print("\t\t"); 
+  Serial.print(time_duration);
+  Serial.print("\n"); 
   
    
   #ifdef DEBUG_SEN
@@ -225,6 +235,56 @@ float *Controller::computePsi(float psi_dot_arr[])
   
 }
 
+ float *Controller::computePsi_new2(float psi_real_arr[]){
+
+   float *ret_arr = new float[3];
+
+   ret_arr[0] = psi_real_arr[0]/cos(ALPHA);
+   ret_arr[1] = (psi_real_arr[2]*2)/(sqrt(3)*cos(ALPHA));
+   ret_arr[2] = psi_real_arr[0]/sin(ALPHA);
+
+   return ret_arr;
+ }
+
+float *Controller::computePsi_new(float psi_real_arr[]){
+
+  float *ret_arr = new float[3];
+
+  static float values_psi_1[2] = {0,0};
+  static float values_psi_2[2] = {0,0};
+  static float values_psi_3[2] = {0,0};
+  
+  static float values_psi_x[2] = {0,0};
+  static float values_psi_y[2] = {0,0};
+  static float values_psi_z[2] = {0,0};
+
+  //aktuellen Werte einlesen
+  values_psi_1[0] = psi_real_arr[0];
+  values_psi_1[1] = psi_real_arr[1];
+  values_psi_1[2] = psi_real_arr[2];
+
+  values_psi_x[0] = values_psi_x[1] + ((values_psi_1[0]-values_psi_1[1])/cos(ALPHA));
+  
+  values_psi_x[1]=values_psi_x[0];
+  values_psi_1[1]=values_psi_1[0]; 
+  ret_arr[0] = values_psi_x[0]; 
+
+  values_psi_y[0] = values_psi_y[1] + ((values_psi_3[0]-values_psi_3[1])*2/(sqrt(3)*cos(ALPHA)));
+  
+  values_psi_y[1]=values_psi_y[0];
+  values_psi_3[1]=values_psi_3[0]; 
+  ret_arr[1] = values_psi_y[0];
+
+   
+  values_psi_z[0] = values_psi_z[1] + ((values_psi_2[0]-values_psi_3[1])/sin(ALPHA));
+  values_psi_z[1]=values_psi_z[0];
+  values_psi_2[1]=values_psi_2[0]; 
+  ret_arr[2] = values_psi_z[0];
+
+  return ret_arr;
+  
+}
+
 float *Controller::computePhiDot(float psi_dot_arr[])
 {
   float *ret_arr = new float[3];
@@ -322,11 +382,38 @@ float *Controller::executeController()
   return ret_arr;
 }
 
+float *Controller::executeController2()
+{
+  static float* ret_arr = new float[3];
+  
+  //Torque in the yz Planar --> T_x
+  ret_arr[0] = (sen_val.theta_x_cpoint * ctrl_val.K_yz_theta +  sen_val.theta_x_dot_cpoint * ctrl_val.K_yz_theta_dot) * -1;
+
+  // Torque in the xz Planar --> T_y
+  ret_arr[1] = (sen_val.theta_y_cpoint * ctrl_val.K_xz_theta + sen_val.theta_y_dot_cpoint * ctrl_val.K_xz_theta_dot) * -1;
+
+  // Torque in the xz Planar --> T_z
+  static float e[2] = {0,0}; 
+
+  //current value of difference e
+  e[0] = sen_val.theta_z_cpoint; 
+
+  ret_arr[2] = 0;//A_PBZ * e[1]; 
+
+  //shift values
+  e[1] = e[0]; 
+  
+  return ret_arr;
+}
+
+
+
+
 float *Controller::computeTorque(float curr_torque_arr[])
 {
   static float* ret_arr = new float[3];
-  Serial.println(cos(ALPHA));
-  Serial.println(curr_torque_arr[2]);
+  //Serial.println(cos(ALPHA));
+ // Serial.println(curr_torque_arr[2]);
   //compute Torque T1
   ret_arr[0] = 0.33*(curr_torque_arr[2]+(2/cos(ALPHA))*(curr_torque_arr[0]*cos(BETA)-curr_torque_arr[1]*sin(BETA))); 
 
@@ -344,9 +431,9 @@ int *Controller::compute2currentunits(float real_torques_arr[]){
 
   static int* ret_arr = new int[3]; 
 
-  ret_arr[0] = K_MOTOR * real_torques_arr[0]; 
-  ret_arr[1] = K_MOTOR * real_torques_arr[1]; 
-  ret_arr[2] = K_MOTOR * real_torques_arr[2]; 
+  ret_arr[0] = K_EXP * real_torques_arr[0]; 
+  ret_arr[1] = K_EXP * real_torques_arr[1]; 
+  ret_arr[2] = K_EXP * real_torques_arr[2]; 
 
   return ret_arr; 
   
