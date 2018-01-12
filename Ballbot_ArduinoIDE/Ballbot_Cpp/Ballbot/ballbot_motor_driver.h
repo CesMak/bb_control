@@ -61,6 +61,9 @@
 #define TORQUE_ENABLE                   1       // Value for enabling the torque
 #define TORQUE_DISABLE                  0       // Value for disabling the torque
 
+#define GOAL_POS                        2000
+#define DXL__POS_THRESHOLD              1 
+
 
 #define DEBUG_MOTOR
 
@@ -71,7 +74,7 @@ class BallbotMotorDriver
   ~BallbotMotorDriver();
   bool init(void);
   void closeDynamixel(void);
-  bool writeServoConfig(uint8_t id, uint8_t length, uint8_t address, uint8_t data);
+  bool writeServoConfig(uint8_t id, uint8_t length, uint8_t address, int data);
   bool setTorque(uint8_t id, bool onoff);
   bool changeMode(uint8_t id, uint16_t mode);
   bool readWheelStates(int32_t wheel_effort_values[], int32_t wheel_velocity_values[], int32_t wheel_position_values[]);

@@ -13,6 +13,9 @@
 #define SAMPL_TIME  100000      // in microseconds
 
 #define A_PBZ       -2.660
+#define K_MOTOR     658.3092  // Current unit per Nm
+
+
 #define ALPHA       PI/4
 #define BETA        PI/3
 #define RK          0.07
@@ -126,6 +129,7 @@ class Controller
   float convert2radiand(float val_deg);
   float *executeController();
   float *computeTorque(float curr_torque_arr[]);
+  int *compute2currentunits(float real_torques_arr[]);
   
 };
 

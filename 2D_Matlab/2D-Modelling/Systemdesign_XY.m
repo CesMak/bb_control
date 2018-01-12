@@ -44,7 +44,7 @@ rank_B_xy = rank(M_B_xy)
 k_s=vpa(f_xy(end,1),4); 
 k_s=double(subs(k_s,T_z,1));
 T_n=T_sampl/2;
-T_r = 1; 
+T_r = T_n*10; 
  %T_n2 = 1/12;
  
 %  

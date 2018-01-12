@@ -27,14 +27,12 @@ BallbotMotorDriver::BallbotMotorDriver()
   wheel_2_id_(DXM_2_ID),
   wheel_3_id_(DXM_3_ID)
 {
-//  baudrate_ = BAUDRATE;
-//  protocol_version_ = PROTOCOL_VERSION;
-//  wheel_1_id_ = DXM_1_ID; 
+
 }
 
 BallbotMotorDriver::~BallbotMotorDriver()
 {
-  closeDynamixel();
+  //closeDynamixel();
 }
 
 bool BallbotMotorDriver::init(void)
@@ -76,16 +74,17 @@ bool BallbotMotorDriver::init(void)
     return false;
   }
 
-  changeMode(wheel_1_id_, 1);
-  changeMode(wheel_2_id_, 1);
-  changeMode(wheel_2_id_, 1);
+//  //Wheel
+  changeMode(wheel_1_id_,3);
+  changeMode(wheel_2_id_,3);
+  changeMode(wheel_3_id_,3);
 
-  setTorque(wheel_1_id_, false);
+  setTorque(wheel_1_id_, false); 
   setTorque(wheel_2_id_, false);
   setTorque(wheel_3_id_, false);
 
-  
-  groupSyncWriteEffort_           = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_EFFORT,   LEN_X_GOAL_EFFORT);
+ 
+  groupSyncWriteEffort_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_EFFORT,   LEN_X_GOAL_EFFORT);
 
   // init bulk reader for wheels (TTL)
   groupBulkReadWheels_ = new dynamixel::GroupBulkRead(portHandler_, packetHandler_);
@@ -111,7 +110,7 @@ void BallbotMotorDriver::closeDynamixel(void)
   portHandler_->closePort();
 }
 
-bool BallbotMotorDriver::writeServoConfig(uint8_t id, uint8_t length, uint8_t address, uint8_t data)
+bool BallbotMotorDriver::writeServoConfig(uint8_t id, uint8_t length, uint8_t address, int data)
 {
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
@@ -125,6 +124,7 @@ bool BallbotMotorDriver::writeServoConfig(uint8_t id, uint8_t length, uint8_t ad
       dxl_comm_result = packetHandler_->write2ByteTxRx(portHandler_, id, address, data, &dxl_error);
       break;
     case 4:
+      Serial.println("OKKK");
       dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, address, data, &dxl_error);
       break;
   }
@@ -176,7 +176,7 @@ bool BallbotMotorDriver::changeMode(uint8_t id, uint16_t mode)
   int dxl_comm_result = COMM_TX_FAIL;
 
   setTorque(id, false);
-  dxl_comm_result = packetHandler_->write2ByteTxRx(portHandler_, id, ADDR_X_MODE_CHANGE, mode, &dxl_error);
+  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_MODE_CHANGE, mode, &dxl_error);
   setTorque(id, true);
 
   char errorLog[50];

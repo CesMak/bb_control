@@ -16,7 +16,7 @@
 #define DXL_ID_M3                       3                   // Dynamixel ID: 3
 #define DXL_ID_M1                       1                   // Dynamixel ID: 1
 #define BAUDRATE                        3000000
-#define DEVICENAME                      "COM4"      // Check which port is being used on your controller
+#define DEVICENAME                      "COM3"      // Check which port is being used on your controller
                                                             // ex) Windows: "COM1"   Linux: "/dev/ttyUSB0"
 
 #define TORQUE_ENABLE                   1                   // Value for enabling the torque
@@ -271,7 +271,7 @@ void loop() {
 //  }
 
 
-
+    delay(5000);
 
 
   //
