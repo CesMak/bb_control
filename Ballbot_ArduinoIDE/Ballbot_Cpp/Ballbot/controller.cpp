@@ -29,8 +29,8 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   float time_start = millis();
   //Theta y,x,z in radiands
   
-  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0])+0.037;
-  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1])-0.02;
+  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1])+X_OFFSET_RAD;
+  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0])+Y_OFFSET_RAD;
   sen_val.theta_z_cpoint = convert2radiand(sensor.rpy[2]);
   float current_theta_arr[3] = {sen_val.theta_x_cpoint, sen_val.theta_y_cpoint, sen_val.theta_z_cpoint};
 //  sen_val.theta_y_cpoint = current_theta_arr[1];
@@ -127,13 +127,21 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   
    
   #ifdef DEBUG_SEN
-    Serial.print("Angle");
-    Serial.print("\t\t");
+    Serial.print("Angle[rad]");
+    Serial.print("\t");
     Serial.print(sen_val.theta_y_cpoint);
     Serial.print("\t");
     Serial.print(sen_val.theta_x_cpoint);
     Serial.print("\t");
     Serial.print(sen_val.theta_z_cpoint);
+    Serial.print("\n");
+    Serial.print("Angle[°]");
+    Serial.print("\t");
+    Serial.print(sen_val.theta_y_cpoint*180/3.14159);
+    Serial.print("\t");
+    Serial.print(sen_val.theta_x_cpoint*180/3.14159);
+    Serial.print("\t");
+    Serial.print(sen_val.theta_z_cpoint*180/3.14159);
     Serial.print("\n");
     Serial.print("Velocity");
     Serial.print("\t");

@@ -10,7 +10,7 @@
 
 #include "ballbot_motor_driver.h"
 
-#define SAMPL_TIME  100000      // in microseconds
+#define SAMPL_TIME  20000      // in microseconds
 
 #define A_PBZ       -2.660
 //#define K_MOTOR     658.3092  // Current unit per Nm
@@ -21,7 +21,9 @@
 #define RK          0.07
 #define RW          0.03
 
-#define FAKT        1.2
+#define FAKT        1.9
+#define X_OFFSET_RAD 0.05
+#define Y_OFFSET_RAD -0.01
 
 #define DEBUG_SEN
 //#define DEBUG_ANGLE

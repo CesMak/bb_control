@@ -102,12 +102,13 @@ void setup()
 
 void loop()
 {
-  imu.update(); 
+
 
 }
 
 void executeController(void)
 {
+    imu.update(); 
     controller.readIMU(imu,motor_driver);
     
 }
