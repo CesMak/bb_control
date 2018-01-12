@@ -18,7 +18,9 @@ Controller::~Controller()
 bool Controller::init(void)
 {
   sen_val = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  ctrl_val = {-3.162,24.8947*FAKT,-0.5533,7.1600*FAKT,-3.162,24.8947*FAKT,-0.5533,7.1600*FAKT,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
+  double theta = 36.9;
+  double phi = 14.7;
+  ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
   gRes=2000.0/32768.0;
 
   return true;
