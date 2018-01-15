@@ -38,7 +38,7 @@ bool Controller::imu_init(cIMU sensor)
 
   Serial.println("take values for > 60s");
   
-  while(counter < 100){
+  while(counter < 1000){
     
     if(millis()-tTime>60 && abs(sensor.rpy[0])<4 && abs(sensor.rpy[1])<4 ){
       tTime = millis();
@@ -48,8 +48,8 @@ bool Controller::imu_init(cIMU sensor)
       counter++;
     }
   }
-  offset_x = storage_imux/100; 
-  offset_y = storage_imuy/100; 
+  offset_x = storage_imux/1000; 
+  offset_y = storage_imuy/1000; 
 
   Serial.print(offset_x);
   Serial.print("\t");
@@ -80,7 +80,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   //The states are the current effort, velocity and position. 
   //But not modified
 
-  if( (abs(sensor.rpy[1]-(offset_x)) <1.5 && abs(sensor.rpy[0]-(offset_y)) < 1.5) || init_once_)
+  if( (abs(sensor.rpy[1]-(offset_x)) <1.1 && abs(sensor.rpy[0]-(offset_y)) < 1.1) || init_once_)
   {
   //TODO:
   // CAUTION at least the effort value is only given positive or if negative as 65526
