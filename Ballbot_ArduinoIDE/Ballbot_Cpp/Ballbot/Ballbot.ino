@@ -128,7 +128,7 @@ void setup()
   delay(3000);
   
   Timer.stop();
-  Timer.setPeriod(SAMPL_TIME);
+  Timer.setPeriod(SAMPLE_TIME);
   Timer.attachInterrupt(executeController);
   Timer.start();
 

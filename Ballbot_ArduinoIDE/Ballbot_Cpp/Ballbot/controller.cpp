@@ -20,7 +20,7 @@ bool Controller::init(void)
   sen_val = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   double theta = 24;
   double phi = 7;
-  ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
+  ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,5.32, 1.000, SAMPLE_TIME /2, 0,0,0,0}; 
   gRes=2000.0/32768.0;
 
   return true;
@@ -287,17 +287,17 @@ float *Controller::computePsi(float psi_dot_arr[])
   static float current_value_psi_z_dot = psi_dot_arr[2];
   
   // Psi_x 
-  values_psi_x[0] = current_value_psi_x_dot*SAMPL_TIME + values_psi_x[1];
+  values_psi_x[0] = current_value_psi_x_dot*SAMPLE_TIME + values_psi_x[1];
   values_psi_x[1]=values_psi_x[0];
   ret_arr[0] = values_psi_x[0]; 
 
    // Psi_y 
-  values_psi_y[0] = current_value_psi_y_dot*SAMPL_TIME + values_psi_y[1];
+  values_psi_y[0] = current_value_psi_y_dot*SAMPLE_TIME + values_psi_y[1];
   values_psi_y[1]=values_psi_y[0];
   ret_arr[1] = values_psi_y[0]; 
 
    // Psi_z 
-  values_psi_z[0] = current_value_psi_z_dot*SAMPL_TIME + values_psi_z[1];
+  values_psi_z[0] = current_value_psi_z_dot*SAMPLE_TIME + values_psi_z[1];
   values_psi_z[1]=values_psi_z[0];
   ret_arr[2] = values_psi_z[0]; 
 
@@ -441,12 +441,22 @@ float *Controller::executeController()
   ret_arr[1] = (sen_val.phi_y_cpoint * ctrl_val.K_xz_phi + sen_val.theta_y_cpoint * ctrl_val.K_xz_theta + sen_val.phi_y_dot_cpoint * ctrl_val.K_xz_phi_dot + sen_val.theta_y_dot_cpoint * ctrl_val.K_xz_theta_dot) * -1;
 
   // Torque in the xz Planar --> T_z
-  static float e[2] = {0,0}; 
+  static float e[3] = {0,0,0};
+  static float u[3] = {0,0,0};
 
   //current value of difference e
   e[0] = sen_val.theta_z_cpoint; 
 
-  ret_arr[2] = A_PBZ * e[1]; 
+  u[0] = B2*e[0]+ B1*e[1] + B0*e[2] + u[2]; 
+
+  e[2] = e[1]; 
+  e[1] = e[0]; 
+
+  u[2] = u[1]; 
+  u[1] = u[0]; 
+
+  ret_arr[2] = u[0]; 
+  
 
   //shift values
   e[1] = e[0]; 
@@ -465,16 +475,23 @@ float *Controller::executeController2()
   ret_arr[1] = (sen_val.theta_y_cpoint * ctrl_val.K_xz_theta + sen_val.theta_y_dot_cpoint * ctrl_val.K_xz_theta_dot) * -1;
 
   // Torque in the xz Planar --> T_z
-  static float e[2] = {0,0}; 
+  static float e[3] = {0,0,0};
+  static float u[3] = {0,0,0};
 
   //current value of difference e
   e[0] = sen_val.theta_z_cpoint; 
 
-  ret_arr[2] = 0;//A_PBZ * e[1]; 
+  u[0] = B2*e[0]+ B1*e[1] + B0*e[2] + u[2]; 
 
-  //shift values
+  e[2] = e[1]; 
   e[1] = e[0]; 
+
+  u[2] = u[1]; 
+  u[1] = u[0]; 
+
+  ret_arr[2] = u[0]; 
   
+ 
   return ret_arr;
 }
 

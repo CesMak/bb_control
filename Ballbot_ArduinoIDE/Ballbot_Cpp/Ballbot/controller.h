@@ -10,10 +10,16 @@
 
 #include "ballbot_motor_driver.h"
 
-#define SAMPL_TIME  40000      // in microseconds
+#define SAMPLE_TIME  40000      // in microseconds
+#define T1          SAMPLE_TIME/2
+#define TR          100*T1
+#define K_PD        6.09       
 
-#define A_PBZ       -2.660
-//#define K_MOTOR     658.3092  // Current unit per Nm
+#define B0          (TR/SAMPLE_TIME)*K_PD
+#define B1          (-1-(2*TR/SAMPLE_TIME))*K_PD
+#define B2          (1+TR/SAMPLE_TIME)*K_PD
+
+//#define K_MOTOR    658.3092  // Current unit per Nm
 #define K_EXP        7 // torque to unit factor 11.11 (Michi)
 
 #define ALPHA       PI/4
