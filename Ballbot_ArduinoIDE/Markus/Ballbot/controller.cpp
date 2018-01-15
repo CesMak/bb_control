@@ -38,7 +38,7 @@ bool Controller::imu_init(cIMU sensor)
 
   Serial.println("take values for > 60s");
   
-  while(counter < 1000){
+  while(counter < 500){
     
     if(millis()-tTime>60 && abs(sensor.rpy[0])<4 && abs(sensor.rpy[1])<4 ){
       tTime = millis();
@@ -48,8 +48,8 @@ bool Controller::imu_init(cIMU sensor)
       counter++;
     }
   }
-  offset_x = storage_imux/1000; 
-  offset_y = storage_imuy/1000; 
+  offset_x = storage_imux/500; 
+  offset_y = storage_imuy/500; 
 
   Serial.print(offset_x);
   Serial.print("\t");
