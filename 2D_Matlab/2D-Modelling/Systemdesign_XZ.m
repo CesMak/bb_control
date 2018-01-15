@@ -57,11 +57,11 @@ rank_B_xz = rank(M_B_xz);
 
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
-Q_xz = [10 0 0 0; 
-        0 50 0 0; 
-        0 0 5 0; 
-        0 0 0 10];
- R_xz = 10;
+Q_xz = [1 0 0 0; 
+        0 500 0 0; 
+        0 0 1 0; 
+        0 0 0 1000];
+ R_xz = 10000;
  
  [K_xz, S_xz, lamda_xz_closed] = lqr(A_xz, B_xz, Q_xz, R_xz);
  
