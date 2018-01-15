@@ -211,7 +211,7 @@ bool BallbotMotorDriver::changeMode(uint8_t id, uint16_t mode)
 
 bool BallbotMotorDriver::readWheelStates(int32_t wheel_effort_values[], int32_t wheel_velocity_values[], int32_t wheel_position_values[])
 { 
-  int wheel_ids[3] ={wheel_1_id_,wheel_2_id_,wheel_3_id_};
+  int wheel_ids[3] ={wheel_1_id_, wheel_2_id_, wheel_3_id_};
   int  dxl_comm_result = COMM_TX_FAIL;
   bool dxl_getdata_result = false;
   
@@ -232,4 +232,21 @@ bool BallbotMotorDriver::readWheelStates(int32_t wheel_effort_values[], int32_t 
   
   return dxl_getdata_result;
 }
+
+//float BallbotMotorDriver::readAddressValue(int motor_id, int addr)
+//{
+//    bool dxl_getdata_result = false;
+//    // Read present position M1
+//          dxl_comm_result = packetHandler->read4ByteTxRx(portHandler, motor_id, addr, (int32_t*)&dxl_present_position_M1, &dxl_error_M1);
+//          if (dxl_comm_result != COMM_SUCCESS)
+//          {
+//            packetHandler->printTxRxResult(dxl_comm_result);
+//          }
+//          else if (dxl_error_M1 != 0)
+//          {
+//            packetHandler->printRxPacketError(dxl_error_M1);
+//          }
+//}
+
+
 

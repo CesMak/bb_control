@@ -14,18 +14,19 @@
 
 #define A_PBZ       -2.660
 //#define K_MOTOR     658.3092  // Current unit per Nm
-#define K_EXP       11.11
+#define K_EXP        7 // torque to unit factor 11.11 (Michi)
 
 #define ALPHA       PI/4
 #define BETA        PI/3
 #define RK          0.07
 #define RW          0.03
 
-#define FAKT        1.0
+#define FAKT        3
 #define X_OFFSET_RAD 0.05
 #define Y_OFFSET_RAD -0.01
 
-#define DEBUG_SEN
+//#define DEBUG_SEN
+#define PRINT_Values
 //#define DEBUG_ANGLE
 //#define DEBUG_VELOCITY
 //#define DEBUG_PSI
@@ -122,6 +123,12 @@ class Controller
   float gRes; 
   sensor_values sen_val;
   controller_values ctrl_val;
+
+  float offset_x;
+  float offset_y;
+
+  bool init_once_;
+  
   Controller();
   ~Controller();
   bool init(void);
@@ -137,6 +144,8 @@ class Controller
   float *executeController2();
   float *computeTorque(float curr_torque_arr[]);
   int *compute2currentunits(float real_torques_arr[]);
+
+  bool imu_init(cIMU sensor);
   
 };
 

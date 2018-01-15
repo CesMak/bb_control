@@ -18,11 +18,42 @@ Controller::~Controller()
 bool Controller::init(void)
 {
   sen_val = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  double theta = 36.9;
-  double phi = 14.7;
+  double theta = 24;
+  double phi = 7;
   ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
   gRes=2000.0/32768.0;
 
+  return true;
+}
+
+bool Controller::imu_init(cIMU sensor)
+{
+  float storage_imux = 0.0;
+  float storage_imuy = 0.0;
+
+  
+  static uint32_t tTime=0;
+  int counter = 0; 
+
+
+  Serial.println("take values for > 60s");
+  
+  while(counter < 100){
+    
+    if(millis()-tTime>60 && abs(sensor.rpy[0])<4 && abs(sensor.rpy[1])<4 ){
+      tTime = millis();
+      sensor.update();
+      storage_imux += sensor.rpy[1];
+      storage_imuy += sensor.rpy[0];  
+      counter++;
+    }
+  }
+  offset_x = storage_imux/100; 
+  offset_y = storage_imuy/100; 
+
+  Serial.print(offset_x);
+  Serial.print("\t");
+  Serial.println(offset_y);
   return true;
 }
 
@@ -31,8 +62,8 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   float time_start = millis();
   //Theta y,x,z in radiands
   
-  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1])+X_OFFSET_RAD;
-  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0])+Y_OFFSET_RAD;
+  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1]-(offset_x));
+  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0]-(offset_y));
   sen_val.theta_z_cpoint = convert2radiand(sensor.rpy[2]);
   float current_theta_arr[3] = {sen_val.theta_x_cpoint, sen_val.theta_y_cpoint, sen_val.theta_z_cpoint};
 //  sen_val.theta_y_cpoint = current_theta_arr[1];
@@ -48,16 +79,29 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   //Reat out the states of each Wheel.
   //The states are the current effort, velocity and position. 
   //But not modified
-  int32_t current_effort_RAW[3]={0.0,0.0,0.0};
-  int32_t current_velocity_RAW[3]={0.0,0.0,0.0};
-  int32_t current_position_RAW[3]={0.0,0.0,0.0};
-  
-  driver.readWheelStates(current_effort_RAW,current_velocity_RAW,current_position_RAW);
 
+  if( (abs(sensor.rpy[1]-(offset_x)) <1.5 && abs(sensor.rpy[0]-(offset_y)) < 1.5) || init_once_)
+  {
+  //TODO:
+  // CAUTION at least the effort value is only given positive or if negative as 65526
+   init_once_ = true;
+  int32_t current_effort_RAW[3]   =  {0.0,   0.0, 0.0}; // this is the present current
+  int32_t current_velocity_RAW[3] =  {0.0, 0.0, 0.0};
+  int32_t current_position_RAW[3] =  {0.0, 0.0, 0.0};
+  
+  driver.readWheelStates(current_effort_RAW, current_velocity_RAW, current_position_RAW);
+
+ 
   //in degree
   float current_position[3];
   for (int i=0; i<3; i++){
-    current_position[i]=current_position_RAW[i]*0.088;
+    current_position[i]=current_position_RAW[i]*0.088; // warum *0.088
+  }
+
+  // convert negative values of current_effort_RAW:
+  if(current_effort_RAW[0]>10000)
+  {
+    current_effort_RAW[0]=current_effort_RAW[0]-65536;
   }
 
   //in radiand
@@ -112,6 +156,9 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   //Convert real Torques into Current
   int* curr_unit_arr = compute2currentunits(real_torques_arr);
 
+  //TODO: caution:
+  //curr_unit_arr[0] = 20.0;
+
   //Load to motors
   driver.writeServoConfig(DXM_1_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[0]);
   driver.writeServoConfig(DXM_2_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[1]); 
@@ -122,13 +169,27 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
 
   float time_duration= time_end - time_start; 
   
-  Serial.print("Time Duration"); 
-  Serial.print("\t\t"); 
-  Serial.print(time_duration);
-  Serial.print("\n"); 
-  
+  #ifdef PRINT_Values
+    Serial.print(time_end/1000);                              Serial.print("\t"); // sec
+    Serial.print(sen_val.theta_x_cpoint*180/3.14159);         Serial.print("\t"); // °
+    Serial.print(sen_val.theta_x_dot_cpoint*180/3.14159);     Serial.print("\t"); // °/sec
+    Serial.print(sen_val.theta_y_cpoint*180/3.14159);         Serial.print("\t");
+    Serial.print(sen_val.theta_y_dot_cpoint*180/3.14159);     Serial.print("\t");
+    
+    Serial.print(current_effort_RAW[0]);                      Serial.print("\t"); // quite high value! if negative?!
+    Serial.print(real_torques_arr[0]);                        Serial.print("\t"); // real_torques_arr*11.11 = curr_unit_arr
+    Serial.print(curr_unit_arr[0]);                           Serial.print("\t");
+    //
+    //curr_unit_arr
+    Serial.print("\n");
+  #endif
    
   #ifdef DEBUG_SEN
+    Serial.print("Time Duration"); 
+    Serial.print("\t\t"); 
+    Serial.print(time_duration);
+    Serial.print("\n"); 
+
     Serial.print("Angle[rad]");
     Serial.print("\t");
     Serial.print(sen_val.theta_y_cpoint);
@@ -194,6 +255,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     Serial.print(curr_unit_arr[2]);
     Serial.print("\n");
   #endif
+  }
 }
 float  *Controller::computePsiDot(float omega_arr[])
 {
@@ -425,13 +487,13 @@ float *Controller::computeTorque(float curr_torque_arr[])
   //Serial.println(cos(ALPHA));
  // Serial.println(curr_torque_arr[2]);
   //compute Torque T1
-  ret_arr[0] = 0.33*(curr_torque_arr[2]+(2/cos(ALPHA))*(curr_torque_arr[0]*cos(BETA)-curr_torque_arr[1]*sin(BETA))); 
+  ret_arr[0] = 0.333333333*(curr_torque_arr[2]+(2/cos(ALPHA))*(curr_torque_arr[0]*cos(BETA)-curr_torque_arr[1]*sin(BETA))); 
 
   //compute Torque T2
-  ret_arr[1] = 0.33*(curr_torque_arr[2]+(1/cos(ALPHA))*(sin(BETA)*(-curr_torque_arr[0]*sqrt(3)+curr_torque_arr[1])-cos(BETA)*(curr_torque_arr[0]+sqrt(3)*curr_torque_arr[1])));
+  ret_arr[1] = 0.333333333*(curr_torque_arr[2]+(1/cos(ALPHA))*(sin(BETA)*(-curr_torque_arr[0]*sqrt(3)+curr_torque_arr[1])-cos(BETA)*(curr_torque_arr[0]+sqrt(3)*curr_torque_arr[1])));
 
   //compute Torque T3
-  ret_arr[2] = 0.33*(curr_torque_arr[2]+(1/cos(ALPHA))*(sin(BETA)*(curr_torque_arr[0]*sqrt(3)+curr_torque_arr[1])+cos(BETA)*(-curr_torque_arr[0]+sqrt(3)*curr_torque_arr[1])));
+  ret_arr[2] = 0.333333333*(curr_torque_arr[2]+(1/cos(ALPHA))*(sin(BETA)*(curr_torque_arr[0]*sqrt(3)+curr_torque_arr[1])+cos(BETA)*(-curr_torque_arr[0]+sqrt(3)*curr_torque_arr[1])));
 
   return ret_arr;
   
@@ -441,9 +503,9 @@ int *Controller::compute2currentunits(float real_torques_arr[]){
 
   static int* ret_arr = new int[3]; 
 
-  ret_arr[0] = K_EXP * real_torques_arr[0]; 
-  ret_arr[1] = K_EXP * real_torques_arr[1]; 
-  ret_arr[2] = K_EXP * real_torques_arr[2]; 
+  ret_arr[0] = round(K_EXP * real_torques_arr[0]); 
+  ret_arr[1] = round(K_EXP * real_torques_arr[1]); 
+  ret_arr[2] = round(K_EXP * real_torques_arr[2]); 
 
   return ret_arr; 
   
