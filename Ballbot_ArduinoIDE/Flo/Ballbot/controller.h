@@ -10,18 +10,7 @@
 
 #include "ballbot_motor_driver.h"
 
-<<<<<<< HEAD
-#define SAMPLE_TIME 40000      // in microseconds
-=======
-<<<<<<< HEAD
-#define SAMPL_TIME  100000      // in microseconds
-
-#define A_PBZ       -2.660
-#define K_MOTOR     658.3092  // Current unit per Nm
-
-=======
 #define SAMPLE_TIME  40000      // in microseconds
->>>>>>> 23c8c4f751b4403b2de96f3de320f5220ba3cd81
 #define T1          SAMPLE_TIME/2
 #define TR          10*T1
 #define K_PD        10       
@@ -32,27 +21,18 @@
 
 //#define K_MOTOR    658.3092  // Current unit per Nm
 #define K_EXP        7 // torque to unit factor 11.11 (Michi)
->>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
 
 #define ALPHA       PI/4
 #define BETA        PI/3
 #define RK          0.07
 #define RW          0.03
 
-<<<<<<< HEAD:Ballbot_ArduinoIDE/Flo/Ballbot/controller.h
 #define FAKT        0.7
-=======
-<<<<<<< HEAD
-#define DEBUG_SEN
-=======
-#define FAKT        3
->>>>>>> 8adc06109c7df4cc933f4846e28561bc7f718c2c:Ballbot_ArduinoIDE/Ballbot_Cpp/Ballbot/controller.h
 #define X_OFFSET_RAD 0.05
 #define Y_OFFSET_RAD -0.01
 
 //#define DEBUG_SEN
 #define PRINT_Values
->>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
 //#define DEBUG_ANGLE
 //#define DEBUG_VELOCITY
 //#define DEBUG_PSI
@@ -161,25 +141,17 @@ class Controller
   void readIMU(cIMU sensor, BallbotMotorDriver driver);
   float *computePsiDot(float omega_arr[]);
   float *computePsi(float psi_dot_arr[]);
-<<<<<<< HEAD
-=======
   float *computePsi_new(float psi_real_arr[]);
   float *computePsi_new2(float psi_real_arr[]); 
->>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
   float *computePhiDot(float psi_dot_arr[]);
   float *computePhi(float psi_arr[], float theta_arr[]);
   float convert2radiand(float val_deg);
   float *executeController();
-<<<<<<< HEAD
-  float *computeTorque(float curr_torque_arr[]);
-  int *compute2currentunits(float real_torques_arr[]);
-=======
   float *executeController2();
   float *computeTorque(float curr_torque_arr[]);
   int16_t *compute2currentunits(float real_torques_arr[]);
 
   bool imu_init(cIMU sensor);
->>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
   
 };
 

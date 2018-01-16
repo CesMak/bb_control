@@ -212,11 +212,7 @@ bool BallbotMotorDriver::changeMode(uint8_t id, uint16_t mode)
 
 bool BallbotMotorDriver::readWheelStates(int32_t wheel_effort_values[], int32_t wheel_velocity_values[], int32_t wheel_position_values[])
 { 
-<<<<<<< HEAD
-  int wheel_ids[3] ={wheel_1_id_,wheel_2_id_,wheel_3_id_};
-=======
   int wheel_ids[3] ={wheel_1_id_, wheel_2_id_, wheel_3_id_};
->>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
   int  dxl_comm_result = COMM_TX_FAIL;
   bool dxl_getdata_result = false;
   
@@ -238,8 +234,6 @@ bool BallbotMotorDriver::readWheelStates(int32_t wheel_effort_values[], int32_t 
   return dxl_getdata_result;
 }
 
-<<<<<<< HEAD
-=======
 //float BallbotMotorDriver::readAddressValue(int motor_id, int addr)
 //{
 //    bool dxl_getdata_result = false;
@@ -257,4 +251,3 @@ bool BallbotMotorDriver::readWheelStates(int32_t wheel_effort_values[], int32_t 
 
 
 
->>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
