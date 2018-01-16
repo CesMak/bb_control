@@ -41,3 +41,5 @@ Q = diag([100, 50, 100, 50, 40, 20, 20, 10, 20, 10]);
  R = diag([100, 100, 100]);
  
  [K, S, lamda_closed] = lqr(A, B, Q, R)
+ 
+ %K = transpose(K)
