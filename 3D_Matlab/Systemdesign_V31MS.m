@@ -188,7 +188,7 @@ A_vt_W3 = [-sin(beta_W3) ; cos(beta_W3) ; 0];
 %Simplification needed
 %has to  be R_LA
 A_Omega_B = R_AL*L_Omega_B - A_Omega_A
-%A_Omega_B = R_AI*L_Omega_B - A_Omega_A;
+%A_Omega_B = R_AI*I_Omega_B - A_Omega_A;
 
 
 
@@ -296,8 +296,8 @@ syms T1 T2 T3;
 %TC3 = A_R_MW3*(-T3);
 
 %final equation
-f_NP = (JT1*T1 + JT2*T2 + JT3*T3).'
-pretty(f_NP)
+f_NP = vpa((JT1*T1 + JT2*T2 + JT3*T3).', 4)
+
 
 
 % %% equation of motion

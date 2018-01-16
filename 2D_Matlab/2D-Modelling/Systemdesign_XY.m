@@ -39,12 +39,22 @@ rank_B_xy = rank(M_B_xy);
 
 
  %% Auslegen P-Regler für theta_z
+<<<<<<< HEAD
+ T_sampl= 0.1;
+% syms k
+k_s=vpa(f_xy(end,1),4); 
+k_s=double(subs(k_s,T_z,1));
+T_n=T_sampl/2;
+T_r = T_n*10; 
+ %T_n2 = 1/12;
+=======
  T_sampl= 0.04;
 % syms k
 k_s=vpa(f_xy(end,1),4); 
 k_s=double(subs(k_s,T_z,1));
 T_1=T_sampl/2;
 T_r = T_1*100; 
+>>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
  
 %  
 G_reg = tf([T_r 1],[T_1 1]);
@@ -57,6 +67,16 @@ F_w = F_o/(1+F_o);
 rlocus(F_o)
 %  
 %  %--> Gain 3.08e08
+<<<<<<< HEAD
+k_reg = 5.32;
+ 
+b0 = k_reg*(T_n/T_sampl);
+b1 = k_reg*(-1-(2*T_n/T_sampl));
+b2 = k_reg*(1+T_n/T_sampl);
+ 
+A_part = -b0;
+B_part = b0+b1+b2;
+=======
 k_reg = 6.09;
 %  
  b0 = k_reg*(T_r/T_sampl);
@@ -65,6 +85,7 @@ k_reg = 6.09;
 %  
 % A_part = -b0;
 % B_part = b0+b1+b2;
+>>>>>>> 308ed102275a4d833007e360641dd4ba1d51ad69
 
 
  

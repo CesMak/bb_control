@@ -66,10 +66,10 @@ L_Omega_B = [phi_x_dot ; phi_y_dot; 0];
 
 %Rotational speed of the omniwheels about the motor axis referenced
 %to frame A
-%syms psi_1_dot psi_2_dot psi_3_dot;
-%A_omega_W1 = psi_1_dot;
-%A_omega_W2 = psi_2_dot;
-%A_omega_W3 = psi_3_dot;
+syms psi_1_dot psi_2_dot psi_3_dot;
+A_omega_W1 = psi_1_dot;
+A_omega_W2 = psi_2_dot;
+A_omega_W3 = psi_3_dot;
 
 %Gravity vector referenced to frame I
 I_G = [0 ; 0 ; -9.81];
@@ -224,81 +224,82 @@ A_Omega_W3 = simplify(A_Omega_W3);
 
 %data readout from A_omega_Wi
 JT1 = [-((2^(1/2)*r_B*(-1))/4)/r_W ; -(2^(1/2)*r_B*(2^(1/2)*r_B*(sin(theta_x)))/4)/r_W ; -((2^(1/2)*r_B*(+ (cos(theta_y))/(cos(theta_y)^2 + sin(theta_y)^2)))/2 + (cos(theta_x)*sin(theta_y))/(cos(theta_x)^2*cos(theta_y)^2 + cos(theta_x)^2*sin(theta_y)^2 + cos(theta_y)^2*sin(theta_x)^2 + sin(theta_x)^2*sin(theta_y))/4)/r_W ; -((2^(1/2)*r_B*(+ (2^(1/2)*r_B*(sin(theta_x)))/4)))/r_W ; -((2^(1/2)*r_B*(- (sin(theta_x))/(cos(theta_x)^2 + sin(theta_x)^2)))/4)/r_W];
-A_omega_W1 = dot(JT1,q_dot);
+%A_omega_W1 = dot(JT1,q_dot);
 
-JT2 = [((2^(1/2)*r_B*(- theta_x_dot))/4)/r_W ; ((433*2^(1/2)*r_B*( theta_y_dot*cos(theta_x)))/1000 + (2^(1/2)*r_B*( theta_y_dot*sin(theta_x)))/8 + (433*2^(1/2)*3^(1/2)*r_B*( theta_y_dot*sin(theta_x)))/2000)/r_W ; ((2^(1/2)*r_B*( theta_z_dot*sin(theta_y)))/4 + (433*2^(1/2)*r_B*( theta_z_dot*cos(theta_y)*sin(theta_x)))/1000 + (2^(1/2)*r_B*(- theta_z_dot*cos(theta_x)*cos(theta_y)))/8 + (433*2^(1/2)*3^(1/2)*r_B*(- theta_z_dot*cos(theta_x)*cos(theta_y)))/2000)/r_W ; ((2^(1/2)*r_B*((phi_x_dot*cos(theta_y))/(cos(theta_y)^2 + sin(theta_y)^2)))/4 +(433*2^(1/2)*r_B*(- (phi_x_dot*sin(theta_x)*sin(theta_y))/(cos(theta_x)^2*cos(theta_y)^2 + cos(theta_x)^2*sin(theta_y)^2 + cos(theta_y)^2*sin(theta_x)^2 + sin(theta_x)^2*sin(theta_y)^2)))/1000 + (2^(1/2)*r_B*( (phi_x_dot*cos(theta_x)*sin(theta_y))/(cos(theta_x)^2*cos(theta_y)^2 + cos(theta_x)^2*sin(theta_y)^2 + cos(theta_y)^2*sin(theta_x)^2 + sin(theta_x)^2*sin(theta_y)^2)))/8 + (433*2^(1/2)*3^(1/2)*r_B*(+ (phi_x_dot*cos(theta_x)*sin(theta_y))/(cos(theta_x)^2*cos(theta_y)^2 + cos(theta_x)^2*sin(theta_y)^2 + cos(theta_y)^2*sin(theta_x)^2 + sin(theta_x)^2*sin(theta_y)^2)))/2000)/r_W ; ((433*2^(1/2)*r_B*(- (phi_y_dot*cos(theta_x))/(cos(theta_x)^2 + sin(theta_x)^2)))/1000 + (2^(1/2)*r_B*(- (phi_y_dot*sin(theta_x))/(cos(theta_x)^2 + sin(theta_x)^2)))/8 + (433*2^(1/2)*3^(1/2)*r_B*(- (phi_y_dot*sin(theta_x))/(cos(theta_x)^2 + sin(theta_x)^2)))/2000)/r_W];
-A_omega_W2 = JT2.' * q_dot;
+JT2 = [(-2^(1/2)*r_B/4)/r_W ; ((433*2^(1/2)*r_B*(cos(theta_x)))/1000 + (2^(1/2)*r_B*(sin(theta_x)))/8 + (433*2^(1/2)*3^(1/2)*r_B*(sin(theta_x)))/2000)/r_W ; ((2^(1/2)*r_B*(sin(theta_y)))/4 + (433*2^(1/2)*r_B*(cos(theta_y)*sin(theta_x)))/1000 + (2^(1/2)*r_B*(-cos(theta_x)*cos(theta_y)))/8 + (433*2^(1/2)*3^(1/2)*r_B*(-cos(theta_x)*cos(theta_y)))/2000)/r_W ; ((2^(1/2)*r_B*((cos(theta_y))/(cos(theta_y)^2 + sin(theta_y)^2)))/4 +(433*2^(1/2)*r_B*(- (sin(theta_x)*sin(theta_y))/(cos(theta_x)^2*cos(theta_y)^2 + cos(theta_x)^2*sin(theta_y)^2 + cos(theta_y)^2*sin(theta_x)^2 + sin(theta_x)^2*sin(theta_y)^2)))/1000 + (2^(1/2)*r_B*( (cos(theta_x)*sin(theta_y))/(cos(theta_x)^2*cos(theta_y)^2 + cos(theta_x)^2*sin(theta_y)^2 + cos(theta_y)^2*sin(theta_x)^2 + sin(theta_x)^2*sin(theta_y)^2)))/8 + (433*2^(1/2)*3^(1/2)*r_B*(+ (cos(theta_x)*sin(theta_y))/(cos(theta_x)^2*cos(theta_y)^2 + cos(theta_x)^2*sin(theta_y)^2 + cos(theta_y)^2*sin(theta_x)^2 + sin(theta_x)^2*sin(theta_y)^2)))/2000)/r_W ; ((433*2^(1/2)*r_B*(- (cos(theta_x))/(cos(theta_x)^2 + sin(theta_x)^2)))/1000 + (2^(1/2)*r_B*(- (sin(theta_x))/(cos(theta_x)^2 + sin(theta_x)^2)))/8 + (433*2^(1/2)*3^(1/2)*r_B*(- (sin(theta_x))/(cos(theta_x)^2 + sin(theta_x)^2)))/2000)/r_W];
+%A_omega_W2 = JT2.' * q_dot;
 
 JT3 = [(2^(1/2)*r_B*(- 500))/(2000*r_W) ; (2^(1/2)*r_B*(- 866*cos(theta_x) + 250*sin(theta_x) + 433*3^(1/2)*sin(theta_x)))/(2000*r_W) ; (2^(1/2)*r_B*(+ 500*sin(theta_y) - 250*cos(theta_x)*cos(theta_y) - 866*cos(theta_y)*sin(theta_x) - 433*3^(1/2)*cos(theta_x)*cos(theta_y)))/(2000*r_W) ; (2^(1/2)*r_B*(500*cos(theta_y) + 250*cos(theta_x)*sin(theta_y) + 866*sin(theta_x)*sin(theta_y) + 433*3^(1/2)*cos(theta_x)*sin(theta_y)))/(2000*r_W) ; (2^(1/2)*r_B*(866*cos(theta_x) - 250*sin(theta_x) - 433*3^(1/2)*sin(theta_x)))/(2000*r_W)];
-A_omega_W3 = JT3.' * q_dot;
+%A_omega_W3 = JT3.' * q_dot;
 
 
-% %% Ball equations
-% %
-% %   
-% %
-% %-------------------------------------------------------------------------
-% 
-% %Vector from the ground to the center of the ball P referenced to frame I
-% T_BP = [0 ; 0 ; r_B];
-% 
-% %Speed vector of the Ball in point P referenced to frame I
-% v_B = simplify(cross(I_Omega_B, T_BP));
-% 
-% 
-% %% Energies
-% %
-% %   
-% %
-% %-------------------------------------------------------------------------
-% 
-% %
-% %
-% %Ball 
-% %
-% %kinetic energy
-% Kin_B = 1/2 * m_B * dot(v_B,v_B) + 1/2 * L_Omega_B.' * I_Theta_B * L_Omega_B;
-% %potential energy
-% Pot_B = 0;
-% 
-% 
-% %
-% %
-% %Body A
-% %
-% %kinetic energy
-% Kin_A = simplify(1/2 * m_AW * dot(v_B,v_B) + m_AW * dot(R_IA*v_B,cross(A_Omega_A, A_T_PG)) + 1/2 * A_Omega_A.' * A_Theta_AW * A_Omega_A);
-% %potential energy
-% Pot_A = -m_AW * (R_IA * I_G).' * A_T_PG;
-% 
-% 
-% %
-% %
-% %Wheels
-% %
-% %kin energy of each wheel
-% Kin_W1 = simplify(1/2 * Theta_W * A_Omega_W1 * A_Omega_W1);
-% Kin_W2 = simplify(1/2 * Theta_W * A_Omega_W1 * A_Omega_W2);
-% Kin_W3 = simplify(1/2 * Theta_W * A_Omega_W1 * A_Omega_W3);
-% 
-% 
-% 
-% %% Non-potential forces
-% %
-% %   
-% %
-% %-------------------------------------------------------------------------
-% syms T1 T2 T3;
-% 
-% %Counter torques
-% %TC1 = A_R_MW1*(-T1)
-% %TC2 = A_R_MW2*(-T2);
-% %TC3 = A_R_MW3*(-T3);
-% 
-% %final equation
-% f_NP = (JT1*T1 + JT2*T2 + JT3*T3).';
-% 
-% 
+%% Ball equations
+%
+%   
+%
+%-------------------------------------------------------------------------
+
+%Vector from the ground to the center of the ball P referenced to frame I
+T_BP = [0 ; 0 ; r_B];
+
+%Speed vector of the Ball in point P referenced to frame I
+v_B = simplify(cross(I_Omega_B, T_BP));
+
+
+%% Energies
+%
+%   
+%
+%-------------------------------------------------------------------------
+
+%
+%
+%Ball 
+%
+%kinetic energy
+Kin_B = 1/2 * m_B * dot(v_B,v_B) + 1/2 * L_Omega_B.' * I_Theta_B * L_Omega_B;
+%potential energy
+Pot_B = 0;
+
+
+%
+%
+%Body A
+%
+%kinetic energy
+Kin_A = simplify(1/2 * m_AW * dot(v_B,v_B) + m_AW * dot(R_IA*v_B,cross(A_Omega_A, A_T_PG)) + 1/2 * A_Omega_A.' * A_Theta_AW * A_Omega_A);
+%potential energy
+Pot_A = -m_AW * (R_IA * I_G).' * A_T_PG;
+
+
+%
+%
+%Wheels
+%
+%kin energy of each wheel
+Kin_W1 = simplify(1/2 * Theta_W * A_Omega_W1 * A_Omega_W1);
+Kin_W2 = simplify(1/2 * Theta_W * A_Omega_W1 * A_Omega_W2);
+Kin_W3 = simplify(1/2 * Theta_W * A_Omega_W1 * A_Omega_W3);
+
+
+
+%% Non-potential forces
+%
+%   
+%
+%-------------------------------------------------------------------------
+syms T1 T2 T3;
+
+%Counter torques
+%TC1 = A_R_MW1*(-T1)
+%TC2 = A_R_MW2*(-T2);
+%TC3 = A_R_MW3*(-T3);
+
+%final equation
+f_NP = vpa((JT1*T1 + JT2*T2 + JT3*T3).', 4)
+
+
+
 % %% equation of motion
 % %
 % %   
