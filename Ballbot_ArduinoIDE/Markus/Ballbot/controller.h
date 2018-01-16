@@ -13,14 +13,14 @@
 #define SAMPL_TIME  40000      // in microseconds
 
 #define A_PBZ       -2.660
-#define K_EXP        222 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
+#define K_EXP        30 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
 
 #define ALPHA       PI/4
 #define BETA        PI/3
 #define RK          0.07
 #define RW          0.03
 
-#define FAKT        1.0
+#define FAKT        1.8
 #define X_OFFSET_RAD 0.05
 #define Y_OFFSET_RAD -0.01
 
@@ -151,6 +151,7 @@ class Controller
 
   bool imu_init(cIMU sensor, int samples);
   void xy_plane2D_controller(BallbotMotorDriver driver);
+  void xyz_2D_controller(BallbotMotorDriver driver);
   
 };
 
