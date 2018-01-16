@@ -24,7 +24,7 @@ i=353.5;
 
 %Winkel
 alpha = pi/4; 
-beta = (2*pi)/3; 
+beta = (pi)/3; 
 beta_1 = 0; 
 beta_2 = (2*pi)/3;
 beta_3 = (4*pi)/3;
