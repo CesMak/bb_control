@@ -28,7 +28,7 @@ f_NP1=[(r_K/r_W)*T_x;
 q_yz=[phi_x; theta_x];
 q_yz_dot=[phi_x_dot;  theta_x_dot];
 
-x_yz=[theta_x, phi_x_dot, theta_x_dot];
+x_yz=[theta_x ,phi_x_dot theta_x_dot];
 u_yz=T_x;
 
 f_yz = [theta_x_dot; 
@@ -58,10 +58,10 @@ rank_B_yz = rank(M_B_yz);
 
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
-Q_yz = [100 0 0; 
-        0 10 0; 
-        0 0 50];
- R_yz = 200;
+Q_yz = [10 0 0;
+        0 1 0; 
+        0 0 1000];
+ R_yz = 100;
  
  [K_yz, S_yz, lamda_yz_closed] = lqr(A_yz, B_yz, Q_yz, R_yz);
  

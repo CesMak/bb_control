@@ -44,7 +44,7 @@ rank_B_xy = rank(M_B_xy);
 k_s=vpa(f_xy(end,1),4); 
 k_s=double(subs(k_s,T_z,1));
 T_1=T_sampl/2;
-T_r = T_1*100; 
+T_r = T_1*2; 
  
 %  
 G_reg = tf([T_r 1],[T_1 1]);
@@ -57,11 +57,11 @@ F_w = F_o/(1+F_o);
 rlocus(F_o)
 %  
 %  %--> Gain 3.08e08
-k_reg = 6.09;
+k_reg = 2.72e4;
 %  
  b0 = k_reg*(T_r/T_sampl);
- b1 = k_reg*(-1-(2*T_n/T_sampl));
- b2 = k_reg*(1+T_n/T_sampl);
+ b1 = k_reg*(-1-(2*T_1/T_sampl));
+ b2 = k_reg*(1+T_1/T_sampl);
 %  
 % A_part = -b0;
 % B_part = b0+b1+b2;

@@ -3,7 +3,7 @@ clc;
 clear all;
 
 %% Load Model Parameter
-Parameter_flag = 1; 
+Parameter_flag = 0; 
 %syms m_K m_W m_A r_K r_W r_A l Theta_K Theta_W Theta_Wxy Theta_A Theta_Axy phi_x phi_x_dot theta_x theta_x_dot T_x g i 
 syms phi_z phi_z_dot phi_x phi_x_dot phi_y phi_y_dot theta_z theta_z_dot theta_x theta_x_dot theta_y theta_y_dot T_x T_y T_z T_f 
 
@@ -17,7 +17,7 @@ end
 %% Compute Model
 Systemdesign_YZ_Reduced;
 Systemdesign_XZ_Reduced;
-%Systemdesign_XY_Reduced;
+Systemdesign_XY_Reduced;
 
 % Arbeitspunkte
 x_AP = [0;0;0];
