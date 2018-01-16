@@ -40,9 +40,9 @@ B_xz_temp=jacobian(f_xz,u_xz);
 
 A_xz=double(subs(A_xz_temp,[x_xz u_xz],[0 0 0 0]));
 B_xz=double(subs(B_xz_temp,[x_xz u_xz],[0 0 0 0]));
-
 C_xz = eye(3);
 D_xz = [0;0;0];
+
 
 
 %Eigenwerte der Systemmatrix berechnen

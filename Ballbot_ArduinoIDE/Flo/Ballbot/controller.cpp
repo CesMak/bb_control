@@ -11,16 +11,16 @@ Controller::Controller()
 
 Controller::~Controller()
 {
-  
+  Serial.println("Destruktor IMU");
 }
 
 
 bool Controller::init(void)
 {
   sen_val = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  double theta = 24;
-  double phi = 7;
-  ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,5.32, 1.000, SAMPLE_TIME /2, 0,0,0,0}; 
+  double theta = 26.0564;
+  double phi = 5.3985;
+  ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,10,SAMPLE_TIME/2,10*T1,0,0,0,0}; 
   gRes=2000.0/32768.0;
 
   return true;
@@ -154,7 +154,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   float* real_torques_arr = computeTorque(curr_torque_arr); 
 
   //Convert real Torques into Current
-  int* curr_unit_arr = compute2currentunits(real_torques_arr);
+  int16_t* curr_unit_arr = compute2currentunits(real_torques_arr);
 
   //TODO: caution:
   //curr_unit_arr[0] = 20.0;
@@ -176,9 +176,15 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     Serial.print(sen_val.theta_y_cpoint*180/3.14159);         Serial.print("\t");
     Serial.print(sen_val.theta_y_dot_cpoint*180/3.14159);     Serial.print("\t");
     
-    Serial.print(current_effort_RAW[0]);                      Serial.print("\t"); // quite high value! if negative?!
+    //Serial.print(current_effort_RAW[0]);                      Serial.print("\t"); // quite high value! if negative?!
     Serial.print(real_torques_arr[0]);                        Serial.print("\t"); // real_torques_arr*11.11 = curr_unit_arr
     Serial.print(curr_unit_arr[0]);                           Serial.print("\t");
+
+    Serial.print(real_torques_arr[1]);                        Serial.print("\t");
+    Serial.print(curr_unit_arr[1]);                           Serial.print("\t");
+    
+    Serial.print(real_torques_arr[2]);                        Serial.print("\t");
+    Serial.print(curr_unit_arr[2]);                           Serial.print("\t");
     //
     //curr_unit_arr
     Serial.print("\n");
@@ -516,13 +522,17 @@ float *Controller::computeTorque(float curr_torque_arr[])
   
 }
 
-int *Controller::compute2currentunits(float real_torques_arr[]){
+int16_t *Controller::compute2currentunits(float real_torques_arr[]){
 
-  static int* ret_arr = new int[3]; 
+  static int16_t* ret_arr = new int16_t[3]; 
 
-  ret_arr[0] = round(K_EXP * real_torques_arr[0]); 
-  ret_arr[1] = round(K_EXP * real_torques_arr[1]); 
-  ret_arr[2] = round(K_EXP * real_torques_arr[2]); 
+  ret_arr[0] = (1/0.0226) * real_torques_arr[0]; 
+  ret_arr[1] = (1/0.0226) * real_torques_arr[1]; 
+  ret_arr[2] = (1/0.0226) * real_torques_arr[2];
+
+//  ret_arr[0] = round(K_EXP * real_torques_arr[0]); 
+//  ret_arr[1] = round(K_EXP * real_torques_arr[1]); 
+//  ret_arr[2] = round(K_EXP * real_torques_arr[2]); 
 
   return ret_arr; 
   

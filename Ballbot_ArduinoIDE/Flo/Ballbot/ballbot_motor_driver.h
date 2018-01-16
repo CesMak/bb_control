@@ -53,7 +53,7 @@
 #define DXM_1_ID                        1
 #define DXM_2_ID                        2
 #define DXM_3_ID                        3
-#define BAUDRATE                        3000000 // baurd rate of Dynamixel
+#define BAUDRATE                        4500000 // baurd rate of Dynamixel
 #define DEVICENAME                      ""      // no need setting on OpenCR
 
 #define WHEEL_JOINT_COUNT               3       

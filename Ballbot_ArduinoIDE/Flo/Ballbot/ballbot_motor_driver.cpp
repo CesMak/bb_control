@@ -32,6 +32,7 @@ BallbotMotorDriver::BallbotMotorDriver()
 
 BallbotMotorDriver::~BallbotMotorDriver()
 {
+  Serial.println("Destruktor MOTOR");
   //closeDynamixel();
 }
 

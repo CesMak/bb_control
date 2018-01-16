@@ -12,8 +12,8 @@
 
 #define SAMPLE_TIME  40000      // in microseconds
 #define T1          SAMPLE_TIME/2
-#define TR          100*T1
-#define K_PD        6.09       
+#define TR          10*T1
+#define K_PD        10       
 
 #define B0          (TR/SAMPLE_TIME)*K_PD
 #define B1          (-1-(2*TR/SAMPLE_TIME))*K_PD
@@ -27,7 +27,7 @@
 #define RK          0.07
 #define RW          0.03
 
-#define FAKT        3
+#define FAKT        0.7
 #define X_OFFSET_RAD 0.05
 #define Y_OFFSET_RAD -0.01
 
@@ -110,8 +110,8 @@ struct controller_values
 
   // controller values for z-direction
   float K_xy;
+  float T_1;
   float T_r;
-  float T_n;
 
   // .....
   float diff;
@@ -149,7 +149,7 @@ class Controller
   float *executeController();
   float *executeController2();
   float *computeTorque(float curr_torque_arr[]);
-  int *compute2currentunits(float real_torques_arr[]);
+  int16_t *compute2currentunits(float real_torques_arr[]);
 
   bool imu_init(cIMU sensor);
   
