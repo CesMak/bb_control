@@ -73,16 +73,7 @@ bool BallbotMotorDriver::init(void)
   {
     return false;
   }
-
-  //Wheel
-  changeMode(wheel_1_id_,3);
-  changeMode(wheel_2_id_,3);
-  changeMode(wheel_3_id_,3);
-
-  setTorque(wheel_1_id_, false); 
-  setTorque(wheel_2_id_, false);
-  setTorque(wheel_3_id_, false);
-
+  
   // Objekt um Radposition etc. auszulesen:
   groupSyncWriteEffort_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_EFFORT,   LEN_X_GOAL_EFFORT);
 
@@ -102,17 +93,8 @@ bool BallbotMotorDriver::init(void)
 void BallbotMotorDriver::referenzFahrt(void)
 {
   Serial.println("Start Referenzfahrt");
-  setTorque(DXM_1_ID,false);
-  setTorque(DXM_2_ID,false);
-  setTorque(DXM_3_ID,false);
-
-  changeMode(DXM_1_ID,3);
-  changeMode(DXM_2_ID,3);
-  changeMode(DXM_3_ID,3);
-
-  setTorque(DXM_1_ID,true);
-  setTorque(DXM_2_ID,true);
-  setTorque(DXM_3_ID,true);
+  //Change to position mode:
+  changeMode(3);
   
   //ZeroPosition
   int32_t wheel_effort_values[3] = {0,0,0};
@@ -142,8 +124,28 @@ void BallbotMotorDriver::referenzFahrt(void)
     readWheelStates(wheel_effort_values,wheel_velocity_values,wheel_position_values);
   }while(abs(goal - wheel_position_values[2]) > DXL__POS_THRESHOLD);
 
-  Serial.print("  M3 okay");
+  Serial.print("M3 okay");
+
+  setTorque(wheel_1_id_, false);
+  setTorque(wheel_2_id_, false);
+  setTorque(wheel_3_id_, false);
+  
   Serial.println("End Referenzfahrt");
+}
+
+void BallbotMotorDriver::changeMode(uint16_t new_mode)
+{
+  setTorque(wheel_1_id_, false);
+  setTorque(wheel_2_id_, false);
+  setTorque(wheel_3_id_, false);
+
+  changeMode(wheel_1_id_, new_mode);
+  changeMode(wheel_2_id_, new_mode);
+  changeMode(wheel_3_id_, new_mode);
+
+  setTorque(wheel_1_id_, true);
+  setTorque(wheel_2_id_, true);
+  setTorque(wheel_3_id_, true);
 }
 
 void BallbotMotorDriver::closeDynamixel(void)

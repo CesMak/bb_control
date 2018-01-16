@@ -113,6 +113,11 @@ struct controller_values
 
   //Actuator Size
   float u;
+
+  // real Torques:
+  float T1;
+  float T2;
+  float T3;
 };
 
 
@@ -130,7 +135,7 @@ class Controller
   
   Controller();
   ~Controller();
-  bool init(void);
+  void init(void);
   void readIMU(cIMU sensor, BallbotMotorDriver driver);
   float *computePsiDot(float omega_arr[]);
   float *computePsi(float psi_dot_arr[]);
@@ -145,6 +150,7 @@ class Controller
   int *compute2currentunits(float real_torques_arr[]);
 
   bool imu_init(cIMU sensor, int samples);
+  void xy_plane2D_controller(BallbotMotorDriver driver);
   
 };
 

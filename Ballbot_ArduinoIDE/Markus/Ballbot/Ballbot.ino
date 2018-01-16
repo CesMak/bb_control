@@ -23,17 +23,8 @@ void setup()
 
   //motor_driver.referenzFahrt();
 
-  motor_driver.setTorque(DXM_1_ID,false);
-  motor_driver.setTorque(DXM_2_ID,false);
-  motor_driver.setTorque(DXM_3_ID,false);
-
-  motor_driver.changeMode(DXM_1_ID,0);
-  motor_driver.changeMode(DXM_2_ID,0);
-  motor_driver.changeMode(DXM_3_ID,0);
-
-  motor_driver.setTorque(DXM_1_ID,true);
-  motor_driver.setTorque(DXM_2_ID,true);
-  motor_driver.setTorque(DXM_3_ID,true);
+  //Change mode to current Control Mode:
+  motor_driver.changeMode(0);
   
   delay(3000);
   
