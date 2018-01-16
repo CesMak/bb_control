@@ -28,21 +28,21 @@ f_NP1_xz=[(r_K/r_W)*T_y;
 q_xz=[phi_y; theta_y];
 q_xz_dot=[phi_y_dot;  theta_y_dot];
 
-x_xz=[phi_y, theta_y, phi_y_dot, theta_y_dot];
+x_xz=[theta_y, phi_y_dot, theta_y_dot];
 u_xz=T_y;
 
-f_xz = [q_xz_dot; 
+f_xz = [theta_y_dot; 
      M_y\(f_NP_xz-(C_y+G_y))]; 
  
 %% Plane YZ - Linearisierung
 A_xz_temp=jacobian(f_xz,x_xz);
 B_xz_temp=jacobian(f_xz,u_xz);
 
-A_xz=double(subs(A_xz_temp,[x_xz u_xz],[0 0 0 0 0]));
-B_xz=double(subs(B_xz_temp,[x_xz u_xz],[0 0 0 0 0]));
+A_xz=double(subs(A_xz_temp,[x_xz u_xz],[0 0 0 0]));
+B_xz=double(subs(B_xz_temp,[x_xz u_xz],[0 0 0 0]));
 
-C_xz = eye(4);
-D_xz = [0;0;0;0];
+C_xz = eye(3);
+D_xz = [0;0;0];
 
 
 %Eigenwerte der Systemmatrix berechnen
@@ -57,11 +57,10 @@ rank_B_xz = rank(M_B_xz);
 
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
-Q_xz = [10 0 0 0; 
-        0 50 0 0; 
-        0 0 5 0; 
-        0 0 0 10];
- R_xz = 10;
+Q_xz = [100 0 0; 
+        0 10 0; 
+        0 0 50];
+ R_xz = 200;
  
  [K_xz, S_xz, lamda_xz_closed] = lqr(A_xz, B_xz, Q_xz, R_xz);
  

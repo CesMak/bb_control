@@ -18,25 +18,24 @@
 
 #include "ballbot_motor_driver.h"
 
-Turtlebot3MotorDriver::Turtlebot3MotorDriver()
-//: baudrate_(BAUDRATE),
-  //protocol_version_(PROTOCOL_VERSION),
-  //left_wheel_id_(DXL_LEFT_ID),
-  //right_wheel_id_(DXL_RIGHT_ID),
-  //arm_0_id_(DXL_ARM_0_ID),
-  //arm_1_id_(DXL_ARM_1_ID),
-  //arm_2_id_(DXL_ARM_2_ID),
-  //arm_3_id_(DXL_ARM_3_ID),
-  //arm_4_id_(DXL_ARM_4_ID)
+extern BallbotMotorDriver motor_driver;
+
+BallbotMotorDriver::BallbotMotorDriver()
+: baudrate_(BAUDRATE),
+  protocol_version_(PROTOCOL_VERSION),
+  wheel_1_id_(DXM_1_ID),
+  wheel_2_id_(DXM_2_ID),
+  wheel_3_id_(DXM_3_ID)
 {
+
 }
 
-Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
+BallbotMotorDriver::~BallbotMotorDriver()
 {
-  closeDynamixel();
+  //closeDynamixel();
 }
 
-bool Turtlebot3MotorDriver::init(void)
+bool BallbotMotorDriver::init(void)
 {
   portHandler_   = dynamixel::PortHandler::getPortHandler(DEVICENAME);
   packetHandler_ = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
@@ -47,6 +46,10 @@ bool Turtlebot3MotorDriver::init(void)
     #ifdef DEBUG
     sprintf(log_msg, "Port is Opened");
     nh.loginfo(log_msg);
+    #endif
+
+    #ifdef DEBUG_MOTOR
+    Serial.println("Port is Opened");
     #endif
   }
   else
@@ -61,66 +64,53 @@ bool Turtlebot3MotorDriver::init(void)
     sprintf(log_msg, "Baudrate is set");
     nh.loginfo(log_msg);
     #endif
+
+    #ifdef DEBUG_MOTOR
+    Serial.println("Baudrate is set");
+    #endif
   }
   else
   {
     return false;
   }
 
-  changeMode(left_wheel_id_, 1);
-  changeMode(right_wheel_id_, 1);
-  changeMode(arm_0_id_, 3);
-  changeMode(arm_1_id_, 3);
-  changeMode(arm_2_id_, 3);
-  changeMode(arm_3_id_, 3);
-  changeMode(arm_4_id_, 5);
+//  //Wheel
+  changeMode(wheel_1_id_,3);
+  changeMode(wheel_2_id_,3);
+  changeMode(wheel_3_id_,3);
 
-  setTorque(left_wheel_id_, false);
-  setTorque(right_wheel_id_, false);
-  setTorque(arm_0_id_, false);
-  setTorque(arm_1_id_, false);
-  setTorque(arm_2_id_, false);
-  setTorque(arm_3_id_, false);
-  setTorque(arm_4_id_, false);
-  
-  groupSyncWriteEffort_           = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_EFFORT,   LEN_X_GOAL_EFFORT);
-  groupSyncWriteVelocity_         = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
-  groupSyncWritePosition_         = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_POSITION, LEN_X_GOAL_POSITION);
+  setTorque(wheel_1_id_, false); 
+  setTorque(wheel_2_id_, false);
+  setTorque(wheel_3_id_, false);
+
+ 
+  groupSyncWriteEffort_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_EFFORT,   LEN_X_GOAL_EFFORT);
 
   // init bulk reader for wheels (TTL)
   groupBulkReadWheels_ = new dynamixel::GroupBulkRead(portHandler_, packetHandler_);
   
-  int wheel_ids[2] = {left_wheel_id_, right_wheel_id_};  
+  int wheel_ids[3] ={wheel_1_id_,wheel_2_id_,wheel_3_id_};
   for(int i = 0; i < WHEEL_JOINT_COUNT; i++)
   {
     if(!groupBulkReadWheels_->addParam(wheel_ids[i], ADDR_X_PRESENT_EFFORT, LEN_X_PRESENT_EFFORT+LEN_X_PRESENT_VELOCITY+LEN_X_PRESENT_POSITION))
       return false;
   }
 
-  // init bulk reader for arm (RS485)
-  groupBulkReadArm_ = new dynamixel::GroupBulkRead(portHandler_, packetHandler_);
-  
-  int arm_ids[ARM_JOINT_COUNT] = {arm_0_id_, arm_1_id_, arm_2_id_, arm_3_id_, arm_4_id_}; 
-  for(int i = 0; i < ARM_JOINT_COUNT; i++)
-  {
-    if(!groupBulkReadArm_->addParam(arm_ids[i], ADDR_X_PRESENT_EFFORT, LEN_X_PRESENT_EFFORT+LEN_X_PRESENT_VELOCITY+LEN_X_PRESENT_POSITION))
-      return false;
-  }
-
   return true;
 }
 
-void Turtlebot3MotorDriver::closeDynamixel(void)
+void BallbotMotorDriver::closeDynamixel(void)
 {
   // Disable Dynamixel Torque
-  setTorque(left_wheel_id_, false);
-  setTorque(right_wheel_id_, false);
+  setTorque(wheel_1_id_, false);
+  setTorque(wheel_2_id_, false);
+  setTorque(wheel_3_id_, false);
 
   // Close port
   portHandler_->closePort();
 }
 
-bool Turtlebot3MotorDriver::writeServoConfig(uint8_t id, uint8_t length, uint8_t address, uint8_t data)
+bool BallbotMotorDriver::writeServoConfig(uint8_t id, uint8_t length, uint8_t address, int data)
 {
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
@@ -134,6 +124,7 @@ bool Turtlebot3MotorDriver::writeServoConfig(uint8_t id, uint8_t length, uint8_t
       dxl_comm_result = packetHandler_->write2ByteTxRx(portHandler_, id, address, data, &dxl_error);
       break;
     case 4:
+      Serial.println("OKKK");
       dxl_comm_result = packetHandler_->write4ByteTxRx(portHandler_, id, address, data, &dxl_error);
       break;
   }
@@ -145,26 +136,11 @@ bool Turtlebot3MotorDriver::writeServoConfig(uint8_t id, uint8_t length, uint8_t
   {
     packetHandler_->printRxPacketError(dxl_error);
   }
-
-  int newBaudrate = data == 5 ? 3000000 : 2000000;
-
-  if(address == ADDR_X_BOARDRATE && id == DXL_ARM_4_ID) 
-  {
-    if (portHandler_->setBaudRate(newBaudrate))
-    {
-      char logMsg[50];
-      sprintf(logMsg, "Baudrate is set to %d", newBaudrate);
-      nh.loginfo(logMsg);      
-    } else {
-      nh.logerror("Error in changing the Baudrate");
-      return false;
-    }
-  }
   
   return true;
 }
 
-bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
+bool BallbotMotorDriver::setTorque(uint8_t id, bool onoff)
 {
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
@@ -172,42 +148,70 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
   dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_TORQUE_ENABLE, onoff, &dxl_error);
   if(dxl_comm_result != COMM_SUCCESS)
   {
+    #ifdef DEBUG
     packetHandler_->printTxRxResult(dxl_comm_result);
+    #endif
+
+    #ifdef DEBUG_MOTOR
+    Serial.println("Error in Setting Torque (comm_result not COMM_SUCCESS)");
+    Serial.println(dxl_comm_result);
+    #endif
   }
   else if(dxl_error != 0)
   {
+    #ifdef DEBUG
     packetHandler_->printRxPacketError(dxl_error);
+    #endif
+
+    #ifdef DEBUG_MOTOR
+    Serial.println("Error in Setting Torque (dxm_error not 0)");
+    #endif
+    
   }
 }
 
-bool Turtlebot3MotorDriver::changeMode(uint8_t id, uint16_t mode)
+bool BallbotMotorDriver::changeMode(uint8_t id, uint16_t mode)
 {
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
 
   setTorque(id, false);
-  dxl_comm_result = packetHandler_->write2ByteTxRx(portHandler_, id, ADDR_X_MODE_CHANGE, mode, &dxl_error);
+  dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_MODE_CHANGE, mode, &dxl_error);
   setTorque(id, true);
 
   char errorLog[50];
   
   if(dxl_comm_result != COMM_SUCCESS)
   {
+    #ifdef DEBUG
     sprintf(errorLog, "Error in changeMode communication (comm_result): %d", (int)dxl_comm_result); 
-    nh.logerror(errorLog);
+    //nh.logerror(errorLog);
     packetHandler_->printTxRxResult(dxl_comm_result);
+    #endif
+    
+    #ifdef DEBUG_MOTOR
+    Serial.println("Error in changeMode communication (comm_result)");
+    #endif
+    
   }
   else if(dxl_error != 0)
   {
+    #ifdef DEBUG
     sprintf(errorLog, "Error in changeMode communication (dxl_error): %d", (int)dxl_error); 
-    nh.logerror(errorLog);
+    //nh.logerror(errorLog);
     packetHandler_->printRxPacketError(dxl_error);
+    #endif
+
+    #ifdef DEBUG_MOTOR
+    Serial.println("Error in changeMode communication (dxm_error)");
+    #endif
+    
   }
 }
 
-bool Turtlebot3MotorDriver::readWheelStates(int32_t wheel_effort_values[], int32_t wheel_velocity_values[], int32_t wheel_position_values[])
-{
-  int  wheel_ids[2] = {left_wheel_id_, right_wheel_id_};  
+bool BallbotMotorDriver::readWheelStates(int32_t wheel_effort_values[], int32_t wheel_velocity_values[], int32_t wheel_position_values[])
+{ 
+  int wheel_ids[3] ={wheel_1_id_,wheel_2_id_,wheel_3_id_};
   int  dxl_comm_result = COMM_TX_FAIL;
   bool dxl_getdata_result = false;
   
@@ -228,160 +232,4 @@ bool Turtlebot3MotorDriver::readWheelStates(int32_t wheel_effort_values[], int32
   
   return dxl_getdata_result;
 }
-
-bool Turtlebot3MotorDriver::readArmStates(int32_t arm_effort_values[], int32_t arm_velocity_values[], int32_t arm_position_values[])
-{
-  int  arm_ids[ARM_JOINT_COUNT] = {arm_0_id_, arm_1_id_, arm_2_id_, arm_3_id_, arm_4_id_}; 
-  int  dxl_comm_result = COMM_TX_FAIL;
-  bool dxl_getdata_result = false;
-  
-  dxl_comm_result = groupBulkReadArm_->txRxPacket();
-  if (dxl_comm_result != COMM_SUCCESS)
-    packetHandler_->printTxRxResult(dxl_comm_result);
-
-  for(int i = 0; i < ARM_JOINT_COUNT; i++)
-  {
-    dxl_getdata_result = groupBulkReadArm_->isAvailable(arm_ids[i], ADDR_X_PRESENT_EFFORT, LEN_X_PRESENT_EFFORT+LEN_X_PRESENT_VELOCITY+LEN_X_PRESENT_POSITION);
-    if (dxl_getdata_result)
-    {
-      arm_effort_values[i] = groupBulkReadArm_->getData(arm_ids[i], ADDR_X_PRESENT_EFFORT, LEN_X_PRESENT_EFFORT);
-      arm_velocity_values[i] = groupBulkReadArm_->getData(arm_ids[i], ADDR_X_PRESENT_VELOCITY, LEN_X_PRESENT_VELOCITY);
-      arm_position_values[i] = groupBulkReadArm_->getData(arm_ids[i], ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
-    }
-  }
-  
-  return dxl_getdata_result;
-}
-
-//bool Turtlebot3MotorDriver::wheelSpeedControl(int64_t goal_vel_1, int64_t goal_vel_2)
-//{
-//  bool dxl_addparam_result_;
-//  int8_t dxl_comm_result_;  
-//
-//  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(left_wheel_id_, (uint8_t*)&goal_vel_1);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(right_wheel_id_, (uint8_t*)&goal_vel_2);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_comm_result_ = groupSyncWriteVelocity_->txPacket();
-//  if (dxl_comm_result_ != COMM_SUCCESS)
-//  {
-//    packetHandler_->printTxRxResult(dxl_comm_result_);
-//    return false;
-//  }
-//
-//  groupSyncWriteVelocity_->clearParam();
-//  return true;
-//}
-//
-//bool Turtlebot3MotorDriver::effortControlArm(int64_t goal_eff_1, int64_t goal_eff_2, int64_t goal_eff_3, int64_t goal_eff_4, int64_t goal_eff_5)
-//{
-//  bool dxl_addparam_result_;
-//  int8_t dxl_comm_result_;
-//
-//  dxl_addparam_result_ = groupSyncWriteEffort_->addParam(arm_0_id_, (uint8_t*)&goal_eff_1);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteEffort_->addParam(arm_1_id_, (uint8_t*)&goal_eff_2);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteEffort_->addParam(arm_2_id_, (uint8_t*)&goal_eff_3);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteEffort_->addParam(arm_3_id_, (uint8_t*)&goal_eff_4);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteEffort_->addParam(arm_4_id_, (uint8_t*)&goal_eff_5);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_comm_result_ = groupSyncWriteEffort_->txPacket();
-//  if (dxl_comm_result_ != COMM_SUCCESS)
-//  {
-//    packetHandler_->printTxRxResult(dxl_comm_result_);
-//    return false;
-//  }
-//
-//  groupSyncWriteEffort_->clearParam();
-//  return true;
-//}
-
-//bool Turtlebot3MotorDriver::velocityControlArm(int64_t goal_vel_1, int64_t goal_vel_2, int64_t goal_vel_3, int64_t goal_vel_4, int64_t goal_vel_5)
-//{
-//  bool dxl_addparam_result_;
-//  int8_t dxl_comm_result_;  
-//
-//  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(arm_0_id_, (uint8_t*)&goal_vel_1);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(arm_1_id_, (uint8_t*)&goal_vel_2);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(arm_2_id_, (uint8_t*)&goal_vel_3);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(arm_3_id_, (uint8_t*)&goal_vel_4);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWriteVelocity_->addParam(arm_4_id_, (uint8_t*)&goal_vel_5);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_comm_result_ = groupSyncWriteVelocity_->txPacket();
-//  if (dxl_comm_result_ != COMM_SUCCESS)
-//  {
-//    packetHandler_->printTxRxResult(dxl_comm_result_);
-//    return false;
-//  }
-//
-//  groupSyncWriteVelocity_->clearParam();
-//  return true;
-//}
-//
-//bool Turtlebot3MotorDriver::positionControlArm(int64_t goal_pos_1, int64_t goal_pos_2, int64_t goal_pos_3, int64_t goal_pos_4, int64_t goal_pos_5)
-//{
-//  bool dxl_addparam_result_;
-//  int8_t dxl_comm_result_;
-//
-//  dxl_addparam_result_ = groupSyncWritePosition_->addParam(arm_0_id_, (uint8_t*)&goal_pos_1);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWritePosition_->addParam(arm_1_id_, (uint8_t*)&goal_pos_2);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWritePosition_->addParam(arm_2_id_, (uint8_t*)&goal_pos_3);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWritePosition_->addParam(arm_3_id_, (uint8_t*)&goal_pos_4);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_addparam_result_ = groupSyncWritePosition_->addParam(arm_4_id_, (uint8_t*)&goal_pos_5);
-//  if (dxl_addparam_result_ != true)
-//    return false;
-//
-//  dxl_comm_result_ = groupSyncWritePosition_->txPacket();
-//  if (dxl_comm_result_ != COMM_SUCCESS)
-//  {
-//    packetHandler_->printTxRxResult(dxl_comm_result_);
-//    return false;
-//  }
-//
-//  groupSyncWritePosition_->clearParam();
-//  return true;
-//}
 

@@ -122,7 +122,7 @@ void loop() {
       }
       else
       {
-        Serial.print("Dynamixel M3 operation mode has succesfully set to --torque controlling mode-- \n");
+        Serial.print("Dynamixel M3 operation mode has succesfully been set to --torque controlling mode-- \n");
       }
        
     
@@ -143,7 +143,7 @@ void loop() {
       }
 
       //First run
-      int goalCurrent = 40;
+      int goalCurrent = 50;
       //
         // Write goal current M3
         dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, DXL_ID_M3, ADDR_PRO_GOAL_CURRENT, goalCurrent, &dxl_error_M3);
