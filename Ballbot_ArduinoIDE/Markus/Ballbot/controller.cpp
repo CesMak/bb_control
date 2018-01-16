@@ -20,7 +20,9 @@ bool Controller::init(void)
   sen_val = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   double theta = 24;
   double phi = 7;
-  ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
+  
+  ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,10, 1.000, SAMPL_TIME /2, 0,0,0,0};
+  //ctrl_val = {-3.162,theta*FAKT,-0.5533,phi*FAKT,-3.162,theta*FAKT,-0.5533,phi*FAKT,5.32, 1.000, SAMPL_TIME /2, 0,0,0,0}; 
   gRes=2000.0/32768.0;
 
   return true;

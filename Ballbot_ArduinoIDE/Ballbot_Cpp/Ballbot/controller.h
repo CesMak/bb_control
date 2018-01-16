@@ -11,6 +11,9 @@
 #include "ballbot_motor_driver.h"
 
 <<<<<<< HEAD
+#define SAMPLE_TIME 40000      // in microseconds
+=======
+<<<<<<< HEAD
 #define SAMPL_TIME  100000      // in microseconds
 
 #define A_PBZ       -2.660
@@ -18,6 +21,7 @@
 
 =======
 #define SAMPLE_TIME  40000      // in microseconds
+>>>>>>> 23c8c4f751b4403b2de96f3de320f5220ba3cd81
 #define T1          SAMPLE_TIME/2
 #define TR          100*T1
 #define K_PD        6.09       

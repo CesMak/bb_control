@@ -355,6 +355,8 @@ void loop() {
         Serial.print("Dynamixel M3 has been successfully connected \n");
       }
 
+
+      Serial.print("Unser TEst");
       //First run
       int goalCurrent = 20;
       int goalPosition = 60000;
@@ -362,7 +364,7 @@ void loop() {
       //
       //
        // Write goal current M1
-        dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, DXL_ID_M1, ADDR_PRO_GOAL_CURRENT, -goalCurrent, &dxl_error_M1);
+        dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, DXL_ID_M3, ADDR_PRO_GOAL_CURRENT, goalCurrent, &dxl_error_M1);
         if (dxl_comm_result != COMM_SUCCESS)
         {
           packetHandler->printTxRxResult(dxl_comm_result);
@@ -371,22 +373,11 @@ void loop() {
         {
           packetHandler->printRxPacketError(dxl_error_M1);
         }
-
-        // Write goal current M3
-        dxl_comm_result = packetHandler->write2ByteTxRx(portHandler, DXL_ID_M3, ADDR_PRO_GOAL_CURRENT, goalCurrent, &dxl_error_M3);
-        if (dxl_comm_result != COMM_SUCCESS)
-        {
-          packetHandler->printTxRxResult(dxl_comm_result);
-        }
-        else if (dxl_error_M3 != 0)
-        {
-          packetHandler->printRxPacketError(dxl_error_M3);
-        }
-    
+        
         do
         {
           // Read present current M1
-          dxl_comm_result = packetHandler->read2ByteTxRx(portHandler, DXL_ID_M1, ADDR_PRO_PRESENT_CURRENT, (uint16_t*)&dxl_present_current_M1, &dxl_error_M1);
+          dxl_comm_result = packetHandler->read2ByteTxRx(portHandler, DXL_ID_M3, ADDR_PRO_PRESENT_CURRENT, (uint16_t*)&dxl_present_current_M1, &dxl_error_M1);
           if (dxl_comm_result != COMM_SUCCESS)
           {
             packetHandler->printTxRxResult(dxl_comm_result);
@@ -395,54 +386,9 @@ void loop() {
           {
             packetHandler->printRxPacketError(dxl_error_M1);
           }
-          // Read present position M1
-          dxl_comm_result = packetHandler->read4ByteTxRx(portHandler, DXL_ID_M1, ADDR_PRO_PRESENT_POSITION, (uint32_t*)&dxl_present_position_M1, &dxl_error_M1);
-          if (dxl_comm_result != COMM_SUCCESS)
-          {
-            packetHandler->printTxRxResult(dxl_comm_result);
-          }
-          else if (dxl_error_M1 != 0)
-          {
-            packetHandler->printRxPacketError(dxl_error_M1);
-          }
-
-          // Read present current M3
-          dxl_comm_result = packetHandler->read2ByteTxRx(portHandler, DXL_ID_M3, ADDR_PRO_PRESENT_CURRENT, (uint16_t*)&dxl_present_current_M3, &dxl_error_M3);
-          if (dxl_comm_result != COMM_SUCCESS)
-          {
-            packetHandler->printTxRxResult(dxl_comm_result);
-          }
-          else if (dxl_error_M3 != 0)
-          {
-            packetHandler->printRxPacketError(dxl_error_M3);
-          }
-          // Read present position M3
-          dxl_comm_result = packetHandler->read4ByteTxRx(portHandler, DXL_ID_M3, ADDR_PRO_PRESENT_POSITION, (uint32_t*)&dxl_present_position_M3, &dxl_error_M3);
-          if (dxl_comm_result != COMM_SUCCESS)
-          {
-            packetHandler->printTxRxResult(dxl_comm_result);
-          }
-          else if (dxl_error_M3 != 0)
-          {
-            packetHandler->printRxPacketError(dxl_error_M3);
-          }
-          Serial.println(" ");
-          Serial.println(" ");
-          Serial.print("[ID:");      Serial.print(DXL_ID_M1);
-          Serial.print(" GoalPositionM1:"); Serial.print(goalPosition);
-          Serial.print(" PresentPositionM1:");  Serial.print(dxl_present_position_M1);
-          Serial.print(" PresentCurrentM1:");  Serial.print(dxl_present_current_M1);
-          Serial.println(" ");
-          Serial.println(" ");
-          Serial.print("[ID:");      Serial.print(DXL_ID_M3);
-          Serial.print(" GoalPositionM3:"); Serial.print(goalPosition);
-          Serial.print(" PressentPositionM3:");  Serial.print(dxl_present_position_M3);
-          Serial.print(" PresentCurrentM3:");  Serial.print(dxl_present_current_M3);
-          Serial.println(" ");
-          Serial.println(" ");
-          Serial.println("-------------------------------------------");
+          Serial.println(dxl_present_current_M1);
              
-        }while((abs(goalPosition - dxl_present_position_M1) > DXL__POS_THRESHOLD)&&(abs(goalPosition - dxl_present_position_M3) > DXL__POS_THRESHOLD));
+        }while((1));
 
     
   
