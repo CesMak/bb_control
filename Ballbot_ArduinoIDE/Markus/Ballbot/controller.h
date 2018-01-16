@@ -13,8 +13,7 @@
 #define SAMPL_TIME  20000      // in microseconds
 
 #define A_PBZ       -2.660
-//#define K_MOTOR     658.3092  // Current unit per Nm
-#define K_EXP        11.11 // torque to unit factor 11.11 (Michi)
+#define K_EXP        11.11 // torque to unit factor 11.11 (Michi)  658.3092 (datasheet)
 
 #define ALPHA       PI/4
 #define BETA        PI/3
@@ -145,7 +144,7 @@ class Controller
   float *computeTorque(float curr_torque_arr[]);
   int *compute2currentunits(float real_torques_arr[]);
 
-  bool imu_init(cIMU sensor);
+  bool imu_init(cIMU sensor, int samples);
   
 };
 

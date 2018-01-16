@@ -26,8 +26,9 @@ bool Controller::init(void)
   return true;
 }
 
-bool Controller::imu_init(cIMU sensor)
+bool Controller::imu_init(cIMU sensor, int samples)
 {
+  // with samples you can adjust how long the init process will last.
   float storage_imux = 0.0;
   float storage_imuy = 0.0;
 
@@ -36,9 +37,9 @@ bool Controller::imu_init(cIMU sensor)
   int counter = 0; 
 
 
-  Serial.println("take values for > 60s");
+  Serial.println("Start IMU init. (Wait some time!) ");
   
-  while(counter < 500){
+  while(counter < samples){
     
     if(millis()-tTime>60 && abs(sensor.rpy[0])<4 && abs(sensor.rpy[1])<4 ){
       tTime = millis();
@@ -48,11 +49,11 @@ bool Controller::imu_init(cIMU sensor)
       counter++;
     }
   }
-  offset_x = storage_imux/500; 
-  offset_y = storage_imuy/500; 
+  offset_x = storage_imux/samples; 
+  offset_y = storage_imuy/samples; 
 
-  Serial.print(offset_x);
-  Serial.print("\t");
+  Serial.print("IMU END init with offest: x_offset: ");   Serial.print(offset_x);
+  Serial.print("\t y_offset: ");
   Serial.println(offset_y);
   return true;
 }
@@ -80,7 +81,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   //The states are the current effort, velocity and position. 
   //But not modified
 
-  if( (abs(sensor.rpy[1]-(offset_x)) <1.1 && abs(sensor.rpy[0]-(offset_y)) < 1.1) || init_once_)
+  if( (abs(sensor.rpy[1]-(offset_x)) <0.5 && abs(sensor.rpy[0]-(offset_y)) < 0.5) || init_once_)
   {
   //TODO:
   // CAUTION at least the effort value is only given positive or if negative as 65526

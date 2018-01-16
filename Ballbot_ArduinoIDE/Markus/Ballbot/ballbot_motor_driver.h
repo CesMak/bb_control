@@ -17,6 +17,7 @@
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 
+// see here api: http://docs.ros.org/kinetic/api/dynamixel_sdk/html/classdynamixel_1_1Protocol1PacketHandler.html#a9b0525ec15696c780025f6f9e74f5b51
 #ifndef BALLBOT_MOTOR_DRIVER_H_
 #define BALLBOT_MOTOR_DRIVER_H_
 
@@ -54,7 +55,7 @@
 #define DXM_1_ID                        1
 #define DXM_2_ID                        2
 #define DXM_3_ID                        3
-#define BAUDRATE                        3000000 // baurd rate of Dynamixel
+#define BAUDRATE                        4500000 // baurd rate of Dynamixel
 #define DEVICENAME                      ""      // no need setting on OpenCR
 
 #define WHEEL_JOINT_COUNT               3       
@@ -76,9 +77,14 @@ class BallbotMotorDriver
   bool init(void);
   void closeDynamixel(void);
   bool writeServoConfig(uint8_t id, uint8_t length, uint8_t address, int data);
+  int  readServoConfig(uint8_t id, uint8_t length, uint16_t address);
+  
   bool setTorque(uint8_t id, bool onoff);
   bool changeMode(uint8_t id, uint16_t mode);
   bool readWheelStates(int32_t wheel_effort_values[], int32_t wheel_velocity_values[], int32_t wheel_position_values[]);
+  void referenzFahrt(void);
+
+  bool writeBaudrate(int newBaud);
 
  private:
   uint32_t baudrate_;
