@@ -74,14 +74,15 @@ bool Controller::imu_init(cIMU sensor, int samples)
       storage_imux += sensor.rpy[1];
       storage_imuy += sensor.rpy[0];
       counter++;
+    if(counter==samples/4)  {Serial.print("IMU INIT 25% finished with current offset: "); Serial.print(storage_imux/(0.25*samples)); Serial.print(" "); Serial.println(storage_imuy/(0.25*samples)); }
+    if(counter==samples/2)  {Serial.print("IMU INIT 50% finished with current offset: "); Serial.print(storage_imux/(0.5*samples)); Serial.print(" "); Serial.println(storage_imuy/(0.5*samples)); }
+    if(counter==3*samples/4){Serial.print("IMU INIT 75% finished with current offset: "); Serial.print(storage_imux/(0.75*samples)); Serial.print(" "); Serial.println(storage_imuy/(0.75*samples)); }
     }
   }
   offset_x = storage_imux / samples;
   offset_y = storage_imuy / samples;
 
-  Serial.print("IMU END init with offest: x_offset: ");   Serial.print(offset_x);
-  Serial.print("\t y_offset: ");
-  Serial.println(offset_y);
+  Serial.print("IMU INIT 100% finished with offset: "); Serial.print(offset_x); Serial.print(" y: "); Serial.println(offset_y);
   return true;
 }
 
@@ -148,6 +149,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     Serial.print(ctrl_val.T2 * K_EXP);                           Serial.print("\t"); // effort in units drauf
     Serial.print(ctrl_val.T3);                                   Serial.print("\t"); // effort in NM drauf
     Serial.print(ctrl_val.T3 * K_EXP);                           Serial.print("\t"); // effort in units drauf
+    Serial.print(time_duration);                          
     //
     //curr_unit_arr
     Serial.print("\n");
@@ -166,7 +168,7 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   // Torque in the xz Planar --> T_y
   virtual_torques[1] = (sen_val.theta_y_cpoint *  14.6965 + sen_val.theta_y_dot_cpoint * 3.6623) * -1;
 
-  virtual_torques[2] = 0.0; // (sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
+  virtual_torques[2] =  (sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
   static float* real_torques = new float[2];
 

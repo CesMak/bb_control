@@ -10,10 +10,10 @@
 
 #include "ballbot_motor_driver.h"
 
-#define SAMPL_TIME  40000      // in microseconds
+#define SAMPL_TIME  10000      // in microseconds
 
 #define A_PBZ       -2.660
-#define K_EXP        30 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
+#define K_EXP        40 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
 
 #define ALPHA       PI/4
 #define BETA        PI/3
