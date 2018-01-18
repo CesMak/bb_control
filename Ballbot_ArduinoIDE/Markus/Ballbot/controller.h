@@ -152,6 +152,7 @@ class Controller
   bool imu_init(cIMU sensor, int samples);
   void xy_plane2D_controller(BallbotMotorDriver driver);
   void xyz_2D_controller(BallbotMotorDriver driver);
+  void x_1D_controller(BallbotMotorDriver driver);
   
 };
 

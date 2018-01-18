@@ -3,12 +3,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("baud_45.txt","r")
+    c=open("data.txt","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
     # Angles:
-    f, axarr = plt.subplots(3, sharex=True)
+    f, axarr = plt.subplots(2, sharex=True)
     axarr[0].plot(input_values[:,0],input_values[:,1],label="theta_x")
     axarr[0].plot(input_values[:,0],input_values[:,3],label="theta_y")
     #axarr[0].set_title('Theta x and theta y sec over °')
@@ -25,15 +25,17 @@ def print_theta(input_values):
     #axarr[1].set_title('Dtheta x and dtheta y sec over °/sec')
     axarr.flat[1].set(ylabel="°/s")
     axarr[1].legend()
-
-    # Motor Torques on wheel 1:
-    axarr[2].plot(input_values[:,0],input_values[:,5],label="gemessen")
-    axarr[2].plot(input_values[:,0],input_values[:,7],label="drauf")
-    axarr[2].set_title('')
-    axarr.flat[2].set(ylabel="Units")
-    axarr[2].legend()
-
     f.subplots_adjust(hspace=0.3)
+
+    f2, axarr2 = plt.subplots(3, sharex=True)
+    # Motor Torques on wheel 1-3:
+    for i in range(0,3):
+        axarr2[i].plot(input_values[:,0],input_values[:,5+2*i],label="measured_m"+str(i+1))
+        axarr2[i].plot(input_values[:,0],input_values[:,6+2*i],label="desired_m"+str(i+1))
+        axarr2[i].set_title('')
+        axarr2.flat[i].set(ylabel="Units")
+        axarr2[i].legend()
+    f2.subplots_adjust(hspace=0.3)
 
     plt.show()
 

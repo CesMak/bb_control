@@ -128,6 +128,16 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
       current_effort_RAW[0] = current_effort_RAW[0] - 65536;
     }
 
+    if (current_effort_RAW[1] > 10000)
+    {
+      current_effort_RAW[1] = current_effort_RAW[1] - 65536;
+    }
+
+    if (current_effort_RAW[2] > 10000)
+    {
+      current_effort_RAW[2] = current_effort_RAW[2] - 65536;
+    }
+
     // Execute Controller
     xyz_2D_controller(driver);
 
@@ -143,18 +153,55 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);     Serial.print("\t");
 
     Serial.print(current_effort_RAW[0]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T1);                                   Serial.print("\t"); // effort in NM drauf
     Serial.print(ctrl_val.T1 * K_EXP);                           Serial.print("\t"); // effort in units drauf
-    Serial.print(ctrl_val.T2);                                   Serial.print("\t"); // effort in NM drauf
+    Serial.print(current_effort_RAW[1]);                         Serial.print("\t"); // effort in units gemessen!
     Serial.print(ctrl_val.T2 * K_EXP);                           Serial.print("\t"); // effort in units drauf
-    Serial.print(ctrl_val.T3);                                   Serial.print("\t"); // effort in NM drauf
+    Serial.print(current_effort_RAW[2]);                         Serial.print("\t"); // effort in units gemessen!
     Serial.print(ctrl_val.T3 * K_EXP);                           Serial.print("\t"); // effort in units drauf
+
     Serial.print(time_duration);                          
     //
     //curr_unit_arr
     Serial.print("\n");
 #endif
   }
+}
+
+
+void Controller::x_1D_controller(BallbotMotorDriver driver)
+{
+  //Compute Tx,Ty
+  static float* virtual_torques = new float[2];
+
+  //Torque in the yz Planar --> T_x
+  virtual_torques[0] = (sen_val.theta_x_cpoint * 14.6965 +  sen_val.theta_x_dot_cpoint * 3.6623) * -1;
+
+  // Torque in the xz Planar --> T_y
+  virtual_torques[1] = 0.0;//(sen_val.theta_y_cpoint *  14.6965 + sen_val.theta_y_dot_cpoint * 3.6623) * -1;
+
+  virtual_torques[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
+
+  static float* real_torques = new float[2];
+
+  real_torques[0] = 0.3333333333333 * (virtual_torques[2] + (2 / cos(ALPHA)) * (virtual_torques[0] * cos(BETA) - virtual_torques[1] * sin(BETA)));
+
+  //compute Torque T2 P14.
+  real_torques[1] = 0.3333333333333 * (virtual_torques[2] + (1 / cos(ALPHA)) * (sin(BETA) * (-virtual_torques[0] * sqrt(3) + virtual_torques[1]) - cos(BETA) * (virtual_torques[0] + sqrt(3) * virtual_torques[1])));
+
+  //compute Torque T3
+  real_torques[2] = 0.3333333333333 * (virtual_torques[2] + (1 / cos(ALPHA)) * (sin(BETA) * (virtual_torques[0] * sqrt(3) + virtual_torques[1]) + cos(BETA) * (-virtual_torques[0] + sqrt(3) * virtual_torques[1])));
+
+  //Convert real Torques into Current
+  int* curr_unit_arr = compute2currentunits(real_torques);
+
+  //Load to motors
+  driver.writeServoConfig(DXM_1_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[0]);
+  driver.writeServoConfig(DXM_2_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[1]);
+  driver.writeServoConfig(DXM_3_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[2]);
+
+  ctrl_val.T1 = real_torques[0];
+  ctrl_val.T2 = real_torques[1];
+  ctrl_val.T3 = real_torques[2];
 }
 
 void Controller::xyz_2D_controller(BallbotMotorDriver driver)
@@ -168,7 +215,7 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   // Torque in the xz Planar --> T_y
   virtual_torques[1] = (sen_val.theta_y_cpoint *  14.6965 + sen_val.theta_y_dot_cpoint * 3.6623) * -1;
 
-  virtual_torques[2] =  (sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
+  virtual_torques[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
   static float* real_torques = new float[2];
 
