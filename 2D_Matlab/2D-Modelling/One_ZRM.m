@@ -19,9 +19,7 @@ x_AP = [0;0;0;0;0;0];
 u_AP =[0;0;0];
 
 % Anfangsbedingungen
-x_0_yz =[0 0 0];
-x_0_xz =[0 0 0];
-x_0_xy =[0 0 0];
+x_0 = [pi/32 0 pi/32 0 pi/32 0];
 
 
 %% theta_x dot dot 
@@ -92,7 +90,7 @@ f_xy = -((r_K*sin(alpha)*(r_K*Theta_Wxy*sin(alpha)*T_f +r_W*Theta_K*T_z))/(r_W^2
 sys_nl = [theta_x_dot;f_yz;theta_y_dot; f_xz; theta_z_dot; f_xy]; 
 x = [theta_x, theta_x_dot, theta_y, theta_y_dot, theta_z, theta_z_dot]; 
 u = [T_x, T_y, T_z]; 
-
+f=[f_yz;f_xz;f_xy];
 A_temp=jacobian(sys_nl,x);
 B_temp=jacobian(sys_nl,u);
 
@@ -117,7 +115,7 @@ Q = [10000 0 0 0 0 0;
         0 100 0 0 0 0; 
         0 0 10000 0 0 0;
         0 0 0 100 0 0;
-        0 0 0 0 10000 0;
+        0 0 0 0 100 0;
         0 0 0 0 0 100];
         
 R=[400 0 0;
