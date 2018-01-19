@@ -13,7 +13,6 @@ void setup()
   while (!Serial) {
   }
 
-  delay(1000);
   Serial.println("Start initialization");
   imu.begin();
   //controller.test_IMU_FILTER(imu);
@@ -27,7 +26,7 @@ void setup()
   //Change mode to current Control Mode:
   motor_driver.changeMode(0);
   
-  delay(3000);
+  delay(1000);
 
   // Dead Time analysis: 7ms
   //controller.do_Step(motor_driver);
@@ -48,7 +47,7 @@ void loop()
 
 void executeController(void)
 {
-    imu.update(); 
+    imu.update(); // do not put this command in readIMU !
     controller.readIMU(imu, motor_driver);
 }
 

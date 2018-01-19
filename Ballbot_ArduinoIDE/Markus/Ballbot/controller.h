@@ -11,17 +11,15 @@
 #include "ballbot_motor_driver.h"
 
 
-// Dead time is around 7ms! of the motors
-#define A_PBZ       -2.660
-#define K_EXP        222 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
-
 // Current Used Constants:
-#define SAMPL_TIME  6000      // in microseconds // if this value is low noise is increased! 
-#define FILTER_FAK  0.01      // ETHZ: 15 HZ rausfiltern das passt mit dem hier aber nicht überein! wenn wert auf 1 filter ist aus
-#define ALPHA       5/18*PI             // je nach balldurchmesser unterschiedlich groß! siehe P. 33
-#define BETA        -2*PI/3          // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
-#define K1          39
-#define K2          11
+// 
+#define SAMPL_TIME  6000      // in microseconds // if this value is low noise is increased!  // Dead time is around 7ms! of the motors
+#define FILTER_FAK  0.125      // ETHZ: 15 HZ rausfiltern das passt mit dem hier aber nicht überein! wenn wert auf 1 filter ist aus; für T=10ms & FilterFAK = 0.125 ca. 13HZ Cuttoff freq.
+#define K_EXP       39      // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
+#define ALPHA       2/9*PI    // je nach balldurchmesser unterschiedlich groß! siehe P. 33 markus gemessen für gelben ball zu 40° und mittelstellung der arme
+#define BETA        -2*PI/3   // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
+#define K1          7.33
+#define K2          2.05
 #define COS_ALPHA   cos(ALPHA)       // in rad.
 #define SIN_ALPHA   sin(ALPHA)
 #define SIN_BETA    -0.86602540378
@@ -33,10 +31,6 @@
 
 #define RK          0.07
 #define RW          0.03
-
-#define FAKT        1.8
-#define X_OFFSET_RAD 0.05
-#define Y_OFFSET_RAD -0.01
 
 //#define DEBUG_SEN
 //#define DEBUG_ANGLE
@@ -97,6 +91,13 @@ struct sensor_values {
   float theta_z_dot_cpoint;
   float psi_z_dot_cpoint;
 
+  float theta_x_cpoint_ohne_Filter;
+  float theta_y_cpoint_ohne_Filter;
+  float theta_z_cpoint_ohne_Filter;
+
+  float theta_y_dot_cpoint_ohne_Filter;
+  float theta_x_dot_cpoint_ohne_Filter;
+  float theta_z_dot_cpoint_ohne_Filter;
 };
 
 
@@ -131,6 +132,10 @@ struct controller_values
   float T1;
   float T2;
   float T3;
+
+  float T1_ohne;
+  float T2_ohne;
+  float T3_ohne;
 };
 
 

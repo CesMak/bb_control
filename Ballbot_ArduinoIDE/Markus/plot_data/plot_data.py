@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("7ms.txt","r")
+    c=open("torque_test","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
@@ -51,11 +51,34 @@ def print_IMU_FILTER_TEST(input_values):
     plt.legend()
     plt.show()
 
+def compare_torque_with_and_without_filter(input_values):
+    f, axarr = plt.subplots(3, sharex=True)
+    axarr[0].plot(input_values[:,0],input_values[:,6],label="t1_mit_filter")
+    axarr[0].plot(input_values[:,0],input_values[:,11],label="t1_ohne_filter")
+    #axarr[0].set_title('Theta x and theta y sec over °')
+    axarr.flat[0].set(xlabel="t in sec", ylabel="Nm")
+    axarr[0].legend()
+
+    axarr[1].plot(input_values[:,0],input_values[:,8],label="t2_mit_filter")
+    axarr[1].plot(input_values[:,0],input_values[:,12],label="t2_ohne_filter")
+    #axarr[0].set_title('Theta x and theta y sec over °')
+    axarr.flat[1].set(xlabel="t in sec", ylabel="Nm")
+    axarr[1].legend()
+
+    axarr[2].plot(input_values[:,0],input_values[:,10],label="t3_mit_filter")
+    axarr[2].plot(input_values[:,0],input_values[:,13],label="t3_ohne_filter")
+    #axarr[0].set_title('Theta x and theta y sec over °')
+    axarr.flat[2].set(xlabel="t in sec", ylabel="Nm")
+    axarr[2].legend()
+
+
+    plt.show()
 
 tmp = read_values()
 #print_IMU_FILTER_TEST(tmp)
-print_theta(tmp)
+#print_theta(tmp)
 #print_wheel(tmp)
+compare_torque_with_and_without_filter(tmp)
 
 
 #Ergebnisse für leerlauf:

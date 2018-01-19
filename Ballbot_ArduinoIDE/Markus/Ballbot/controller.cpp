@@ -23,16 +23,16 @@ void Controller::init(void)
   double phi = 7;
 
   // K_values for x-direction
-  ctrl_val.K_yz_phi       = -3.162;
-  ctrl_val.K_yz_theta     = theta * FAKT;
-  ctrl_val.K_yz_phi_dot   = -0.5533;
-  ctrl_val.K_yz_theta_dot = phi * FAKT;
-
-  // K_values for y-direction
-  ctrl_val.K_xz_phi       = -3.162;
-  ctrl_val.K_xz_theta     = theta * FAKT;
-  ctrl_val.K_xz_phi_dot   = -0.5533;
-  ctrl_val.K_xz_theta_dot = phi * FAKT;
+//  ctrl_val.K_yz_phi       = -3.162;
+//  ctrl_val.K_yz_theta     = theta * FAKT;
+//  ctrl_val.K_yz_phi_dot   = -0.5533;
+//  ctrl_val.K_yz_theta_dot = phi * FAKT;
+//
+//  // K_values for y-direction
+//  ctrl_val.K_xz_phi       = -3.162;
+//  ctrl_val.K_xz_theta     = theta * FAKT;
+//  ctrl_val.K_xz_phi_dot   = -0.5533;
+//  ctrl_val.K_xz_theta_dot = phi * FAKT;
 
   // controller values for z-direction
   ctrl_val.K_xy          = 0;
@@ -143,7 +143,6 @@ void Controller::imu_Filter(cIMU sensor, bool use_filter)
       return;//delay(8);
     }
     
-    sensor.update();
     storage_x = last_storage_x - ( last_storage_x - sensor.rpy[1] ) * FILTER_FAK;
     storage_y = last_storage_y - ( last_storage_y - sensor.rpy[0] ) * FILTER_FAK;
     storage_z = last_storage_z - ( last_storage_z - sensor.rpy[2] ) * FILTER_FAK;
@@ -172,14 +171,14 @@ void Controller::imu_Filter(cIMU sensor, bool use_filter)
   else
   {
     //Theta y,x,z in radiands
-    sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1] - offset_x);
-    sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0] - offset_y);
-    sen_val.theta_z_cpoint = convert2radiand(sensor.rpy[2]);
+    sen_val.theta_x_cpoint_ohne_Filter = convert2radiand(sensor.rpy[1] - offset_x);
+    sen_val.theta_y_cpoint_ohne_Filter = convert2radiand(sensor.rpy[0] - offset_y);
+    sen_val.theta_z_cpoint_ohne_Filter = convert2radiand(sensor.rpy[2]);
 
     // Theta_dot y,x,z
-    sen_val.theta_y_dot_cpoint = convert2radiand(sensor.gyroData[0] * gRes);
-    sen_val.theta_x_dot_cpoint = convert2radiand(sensor.gyroData[1] * gRes);
-    sen_val.theta_z_dot_cpoint = convert2radiand(sensor.gyroData[2] * gRes);
+    sen_val.theta_y_dot_cpoint_ohne_Filter = convert2radiand(sensor.gyroData[0] * gRes);
+    sen_val.theta_x_dot_cpoint_ohne_Filter = convert2radiand(sensor.gyroData[1] * gRes);
+    sen_val.theta_z_dot_cpoint_ohne_Filter = convert2radiand(sensor.gyroData[2] * gRes);
   }
 
 }
@@ -193,8 +192,8 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   //dass motor nicht gleich losfährt wegen anfangs IMU offset.
   if ( (abs(sensor.rpy[1] - (offset_x)) < 0.3 && abs(sensor.rpy[0] - (offset_y)) < 0.3) || init_once_)
   {
-
     imu_Filter(sensor, true);
+    imu_Filter(sensor, false);
     init_once_ = true;
 
     // Read out wheel states (current[units], velocity, position)
@@ -222,12 +221,16 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     Serial.print(sen_val.theta_y_cpoint * 180 / 3.14159);         Serial.print("\t");
     Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);     Serial.print("\t");
 
-    Serial.print(current_effort_RAW[0]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T1 * K_EXP);                           Serial.print("\t"); // effort in units drauf
-    Serial.print(current_effort_RAW[1]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T2 * K_EXP);                           Serial.print("\t"); // effort in units drauf
-    Serial.print(current_effort_RAW[2]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T3 * K_EXP);                           Serial.print("\t"); // effort in units drauf
+    Serial.print(current_effort_RAW[0]);                        Serial.print("\t"); // effort in units gemessen!
+    Serial.print(ctrl_val.T1);                                  Serial.print("\t"); // effort in units drauf
+    Serial.print(current_effort_RAW[1]);                        Serial.print("\t"); // effort in units gemessen!
+    Serial.print(ctrl_val.T2);                                  Serial.print("\t"); // effort in units drauf
+    Serial.print(current_effort_RAW[2]);                        Serial.print("\t"); // effort in units gemessen!
+    Serial.print(ctrl_val.T3);                                  Serial.print("\t"); // effort in units drauf
+
+    Serial.print(ctrl_val.T1_ohne);                             Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T2_ohne);                             Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T3_ohne);                             Serial.print("\t"); // effort in units drauf
 
     Serial.print(time_duration);
     //
@@ -281,6 +284,17 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
 
   //Convert real Torques into Current
   int* curr_unit_arr = compute2currentunits(real_torques);
+  int torque_offset = 10; // friction
+  for(int i = 0; i<3; i++)
+  {
+    if(curr_unit_arr[i] > 0)
+    {
+      curr_unit_arr[i] += torque_offset;
+    }
+    else{
+      curr_unit_arr[i] -= torque_offset;
+    }
+  }
 
   //Load to motors
   driver.writeServoConfig(DXM_1_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[0]);
@@ -290,6 +304,32 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   ctrl_val.T1 = real_torques[0];
   ctrl_val.T2 = real_torques[1];
   ctrl_val.T3 = real_torques[2];
+
+
+  // calculate as well without filtering:
+    static float* virtual_torques_ohne_Filter = new float[2];
+
+  //Torque in the yz Planar --> T_x
+  virtual_torques_ohne_Filter[0] = (sen_val.theta_x_cpoint_ohne_Filter * K1 +  sen_val.theta_x_dot_cpoint_ohne_Filter * K2) * -1;
+
+  // Torque in the xz Planar --> T_y
+  virtual_torques_ohne_Filter[1] = (sen_val.theta_y_cpoint_ohne_Filter * K1 + sen_val.theta_y_dot_cpoint_ohne_Filter *  K2) * -1;
+
+  virtual_torques_ohne_Filter[2] = 0.0;//(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
+
+  static float* real_torques_ohne_Filter = new float[2];
+
+  real_torques_ohne_Filter[0] = 0.333333333 * (virtual_torques_ohne_Filter[2] + (2 / COS_ALPHA) * (virtual_torques_ohne_Filter[0] * COS_BETA - virtual_torques_ohne_Filter[1] * SIN_BETA));
+
+  //compute Torque T2
+  real_torques_ohne_Filter[1] = 0.333333333 * (virtual_torques_ohne_Filter[2] + (1 / COS_ALPHA) * (SIN_BETA * (-virtual_torques_ohne_Filter[0] * SQRT3 + virtual_torques_ohne_Filter[1]) - COS_BETA * (virtual_torques_ohne_Filter[0] + SQRT3 * virtual_torques_ohne_Filter[1])));
+
+  //compute Torque T3
+  real_torques_ohne_Filter[2] = 0.333333333 * (virtual_torques_ohne_Filter[2] + (1 / COS_ALPHA) * (SIN_BETA * (virtual_torques_ohne_Filter[0] * SQRT3 + virtual_torques_ohne_Filter[1]) + COS_BETA * (-virtual_torques_ohne_Filter[0] + SQRT3 * virtual_torques_ohne_Filter[1])));
+
+  ctrl_val.T1_ohne = real_torques_ohne_Filter[0];
+  ctrl_val.T2_ohne = real_torques_ohne_Filter[1];
+  ctrl_val.T3_ohne = real_torques_ohne_Filter[2];
 }
 
 float* Controller::torques_filter(float real_torques[], bool use_filter)

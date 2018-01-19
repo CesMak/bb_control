@@ -259,7 +259,7 @@ bool BallbotMotorDriver::changeMode(uint8_t id, uint16_t mode)
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
 
-  setTorque(id, false);
+  setTorque(id, true);
   dxl_comm_result = packetHandler_->write1ByteTxRx(portHandler_, id, ADDR_X_MODE_CHANGE, mode, &dxl_error);
   setTorque(id, true);
 

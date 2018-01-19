@@ -106,22 +106,27 @@ void setup() {
   Serial.print("Starting the experiment:");
 
   int startgoalCurrent = 50; //Units
-  for (int i = startgoalCurrent; i < 400; i = i + 25)
+  write_goalCurrent(packetHandler, portHandler, 10);
+  while(1)
   {
-    write_goalCurrent(packetHandler, portHandler, i);
-
-    int tTime = 6000+millis();
-
-    int current_time = millis();
-    
-    while (tTime - current_time > 0 ) {
-      current_time=millis();
-      Serial.print("time left: "); Serial.println(tTime - current_time);
-      read_goalCurrent(packetHandler, portHandler);
-    }
-
-    blink_LED(packetHandler, portHandler);
+  read_goalCurrent(packetHandler, portHandler);
   }
+//  for (int i = startgoalCurrent; i < 400; i = i + 25)
+//  {
+//    write_goalCurrent(packetHandler, portHandler, i);
+//
+//    int tTime = 6000+millis();
+//
+//    int current_time = millis();
+//    
+//    while (tTime - current_time > 0 ) {
+//      current_time=millis();
+//      Serial.print("time left: "); Serial.println(tTime - current_time);
+//      read_goalCurrent(packetHandler, portHandler);
+//    }
+//
+//    blink_LED(packetHandler, portHandler);
+//  }
 
 
   dxl_comm_result = packetHandler->write1ByteTxRx(portHandler, MOTOR_ID_, ADDR_PRO_TORQUE_ENABLE, TORQUE_DISABLE, &dxl_error_);
