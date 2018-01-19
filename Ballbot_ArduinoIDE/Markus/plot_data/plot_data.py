@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("Versuch_mitFilter_50_K_14_3","r")
+    c=open("7ms.txt","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
