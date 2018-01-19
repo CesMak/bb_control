@@ -11,7 +11,7 @@
 #include "ballbot_motor_driver.h"
 
 #define SAMPL_TIME  10000      // in microseconds // if this value is low noise is increased! 
-                               // Dead time is around 7ms!
+// Dead time is around 7ms!
 #define A_PBZ       -2.660
 #define K_EXP        222 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
 
@@ -31,7 +31,7 @@
 //#define DEBUG_PSI
 //#define DEBUG_PSI_DOT
 
-struct sensor_values{
+struct sensor_values {
 
   //x-Axis
   float phi_x_spoint ;
@@ -44,11 +44,11 @@ struct sensor_values{
 
   float phi_x_dot_spoint;
   float theta_x_dot_spoint;
-  float psi_x_dot_spoint; 
+  float psi_x_dot_spoint;
 
   float phi_x_dot_cpoint;
-  float theta_x_dot_cpoint; 
-  float psi_x_dot_cpoint; 
+  float theta_x_dot_cpoint;
+  float psi_x_dot_cpoint;
 
   //xz planar
   float phi_y_spoint;
@@ -61,11 +61,11 @@ struct sensor_values{
 
   float phi_y_dot_spoint;
   float theta_y_dot_spoint;
-  float psi_y_dot_spoint; 
+  float psi_y_dot_spoint;
 
   float phi_y_dot_cpoint;
-  float theta_y_dot_cpoint; 
-  float psi_y_dot_cpoint; 
+  float theta_y_dot_cpoint;
+  float psi_y_dot_cpoint;
 
   //xy planar
   float phi_z_spoint;
@@ -78,11 +78,11 @@ struct sensor_values{
 
   float phi_z_dot_spoint;
   float theta_z_dot_spoint;
-  float psi_z_dot_spoint; 
+  float psi_z_dot_spoint;
 
   float phi_z_dot_cpoint;
-  float theta_z_dot_cpoint; 
-  float psi_z_dot_cpoint; 
+  float theta_z_dot_cpoint;
+  float psi_z_dot_cpoint;
 
 };
 
@@ -90,9 +90,9 @@ struct sensor_values{
 struct controller_values
 {
   // K_values for x-direction
-  float K_yz_phi; 
-  float K_yz_theta; 
-  float K_yz_phi_dot; 
+  float K_yz_phi;
+  float K_yz_theta;
+  float K_yz_phi_dot;
   float K_yz_theta_dot;
 
   // K_values for y-direction
@@ -124,40 +124,47 @@ struct controller_values
 class Controller
 {
   public:
-  float gRes; 
-  sensor_values sen_val;
-  controller_values ctrl_val;
+    float gRes;
+    sensor_values sen_val;
+    controller_values ctrl_val;
 
-  float offset_x;
-  float offset_y;
+    float offset_x;
+    float offset_y;
 
-  bool init_once_;
+    bool init_once_;
 
-  bool init_imu_filter_;
-  
-  Controller();
-  ~Controller();
-  void init(void);
-  void readIMU(cIMU sensor, BallbotMotorDriver driver);
-  float *computePsiDot(float omega_arr[]);
-  float *computePsi(float psi_dot_arr[]);
-  float *computePsi_new(float psi_real_arr[]);
-  float *computePsi_new2(float psi_real_arr[]); 
-  float *computePhiDot(float psi_dot_arr[]);
-  float *computePhi(float psi_arr[], float theta_arr[]);
-  float convert2radiand(float val_deg);
-  float *executeController();
-  float *executeController2();
-  float *computeTorque(float curr_torque_arr[]);
-  int *compute2currentunits(float real_torques_arr[]);
+    bool init_imu_filter_;
+    float last_storage_x;
+    float last_storage_y;
+    float last_storage_z;
+    float storage_x;
+    float storage_y;
+    float storage_z;
 
-  bool imu_init(cIMU sensor, int samples);
-  void xy_plane2D_controller(BallbotMotorDriver driver);
-  void xyz_2D_controller(BallbotMotorDriver driver);
-  void x_1D_controller(BallbotMotorDriver driver);
-  void do_Step(BallbotMotorDriver driver);
-  void test_IMU_FILTER(cIMU sensor);
-  
+    Controller();
+    ~Controller();
+    void init(void);
+    void readIMU(cIMU sensor, BallbotMotorDriver driver);
+    float *computePsiDot(float omega_arr[]);
+    float *computePsi(float psi_dot_arr[]);
+    float *computePsi_new(float psi_real_arr[]);
+    float *computePsi_new2(float psi_real_arr[]);
+    float *computePhiDot(float psi_dot_arr[]);
+    float *computePhi(float psi_arr[], float theta_arr[]);
+    float convert2radiand(float val_deg);
+    float *executeController();
+    float *executeController2();
+    float *computeTorque(float curr_torque_arr[]);
+    int *compute2currentunits(float real_torques_arr[]);
+
+    bool imu_init(cIMU sensor, int samples);
+    void xy_plane2D_controller(BallbotMotorDriver driver);
+    void xyz_2D_controller(BallbotMotorDriver driver);
+    void x_1D_controller(BallbotMotorDriver driver);
+    void do_Step(BallbotMotorDriver driver);
+    void test_IMU_FILTER(cIMU sensor);
+    void imu_Filter(cIMU sensor, bool use_filter);
+
 };
 
 #endif

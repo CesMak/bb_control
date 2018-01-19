@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("filter8","r")
+    c=open("Versuch_mitFilter_50_K_14_3","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
@@ -53,8 +53,8 @@ def print_IMU_FILTER_TEST(input_values):
 
 
 tmp = read_values()
-print_IMU_FILTER_TEST(tmp)
-#print_theta(tmp)
+#print_IMU_FILTER_TEST(tmp)
+print_theta(tmp)
 #print_wheel(tmp)
 
 

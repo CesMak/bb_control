@@ -16,8 +16,7 @@ void setup()
   delay(1000);
   Serial.println("Start initialization");
   imu.begin();
-  controller.test_IMU_FILTER(imu);
-  
+  //controller.test_IMU_FILTER(imu);
   controller.imu_init(imu, 500);
   controller.init();
   motor_driver.init();

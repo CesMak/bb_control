@@ -103,39 +103,57 @@ bool Controller::imu_init(cIMU sensor, int samples)
 }
 
 
-void Controller::imu_Filter(cIMU sensor)
+void Controller::imu_Filter(cIMU sensor, bool use_filter)
 {
   // 1. Init step do this only once:
-  if (!init_imu_filter_)
+  if (use_filter)
   {
-    sensor.update();
-    float last_storage_x = sensor.rpy[1] - (offset_x);
-    float last_storage_y = sensor.rpy[0] - (offset_y);
-    float last_storage_z = sensor.rpy[2];
+    if (!init_imu_filter_)
+    {
+      sensor.update();
+      float last_storage_x = sensor.rpy[1];
+      float last_storage_y = sensor.rpy[0];
+      float last_storage_z = sensor.rpy[2];
 
-    float storage_x = sensor.rpy[1] - (offset_x);
-    float storage_y = sensor.rpy[0] - (offset_y);
-    float storage_z = sensor.rpy[2];
-    imu_filter = true;
+      float storage_x = sensor.rpy[1];
+      float storage_y = sensor.rpy[0];
+      float storage_z = sensor.rpy[2];
+      init_imu_filter_ = true;
+      delay(8);
+    }
+
+    sensor.update();
+    storage_x = last_storage_x - ( last_storage_x - sensor.rpy[1] ) * 0.5;
+    storage_y = last_storage_y - ( last_storage_y - sensor.rpy[0] ) * 0.5;
+    storage_z = last_storage_z - ( last_storage_z - sensor.rpy[2] ) * 0.5;
+    last_storage_x = storage_x;
+    last_storage_y = storage_y;
+    last_storage_z = storage_z;
+
+    //Theta y,x,z in radiands
+    sen_val.theta_x_cpoint = convert2radiand(storage_x - offset_x);
+    sen_val.theta_y_cpoint = convert2radiand(storage_y - offset_y);
+    sen_val.theta_z_cpoint = convert2radiand(storage_z);
+
+    // Theta_dot y,x,z
+    sen_val.theta_y_dot_cpoint = convert2radiand(sensor.gyroData[0] * gRes);
+    sen_val.theta_x_dot_cpoint = convert2radiand(sensor.gyroData[1] * gRes);
+    sen_val.theta_z_dot_cpoint = convert2radiand(sensor.gyroData[2] * gRes);
+  }
+  
+  else
+  {
+    //Theta y,x,z in radiands
+    sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1] - offset_x);
+    sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0] - offset_y);
+    sen_val.theta_z_cpoint = convert2radiand(sensor.rpy[2]);
+
+    // Theta_dot y,x,z
+    sen_val.theta_y_dot_cpoint = convert2radiand(sensor.gyroData[0] * gRes);
+    sen_val.theta_x_dot_cpoint = convert2radiand(sensor.gyroData[1] * gRes);
+    sen_val.theta_z_dot_cpoint = convert2radiand(sensor.gyroData[2] * gRes);
   }
 
-  sensor.update();
-  storage_x = last_storage_x - ( last_storage_x - sensor.rpy[1] ) * 0.125;
-  storage_y = last_storage_y - ( last_storage_y - sensor.rpy[0] ) * 0.125;
-  storage_z = last_storage_z - ( last_storage_z - sensor.rpy[2] ) * 0.125;
-  last_storage_x = storage_x;
-  last_storage_y = storage_y;
-  last_storage_z = storage_z;
-
-  //Theta y,x,z in radiands
-  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1]);
-  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0]);
-  sen_val.theta_z_cpoint = convert2radiand(sensor.rpy[2]);
-
-  // Theta_dot y,x,z
-  sen_val.theta_y_dot_cpoint = convert2radiand(sensor.gyroData[0] * gRes);
-  sen_val.theta_x_dot_cpoint = convert2radiand(sensor.gyroData[1] * gRes);
-  sen_val.theta_z_dot_cpoint = convert2radiand(sensor.gyroData[2] * gRes);
 }
 
 
@@ -144,12 +162,10 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
 {
   float time_start = millis();
 
-  imu_Filter(sensor);
-  
   //dass motor nicht gleich losfährt wegen anfangs IMU offset.
   if ( (abs(sensor.rpy[1] - (offset_x)) < 0.5 && abs(sensor.rpy[0] - (offset_y)) < 0.5) || init_once_)
   {
-
+    imu_Filter(sensor, true);
     init_once_ = true;
 
     // Read out wheel states (current[units], velocity, position)
@@ -191,11 +207,11 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);     Serial.print("\t");
 
     Serial.print(current_effort_RAW[0]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T1 * K_EXP);                             Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T1 * K_EXP);                           Serial.print("\t"); // effort in units drauf
     Serial.print(current_effort_RAW[1]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T2 * K_EXP);                             Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T2 * K_EXP);                           Serial.print("\t"); // effort in units drauf
     Serial.print(current_effort_RAW[2]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T3 * K_EXP);                             Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T3 * K_EXP);                           Serial.print("\t"); // effort in units drauf
 
     Serial.print(time_duration);
     //
@@ -262,10 +278,10 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   static float* virtual_torques = new float[2];
 
   //Torque in the yz Planar --> T_x
-  virtual_torques[0] = (sen_val.theta_x_cpoint * 2.5 +  sen_val.theta_x_dot_cpoint * 0.7623) * -1;
+  virtual_torques[0] = (sen_val.theta_x_cpoint * 2.45 +  sen_val.theta_x_dot_cpoint * 0.6623) * -1;
 
   // Torque in the xz Planar --> T_y
-  virtual_torques[1] = (sen_val.theta_y_cpoint * 2.5 + sen_val.theta_y_dot_cpoint * 0.7623) * -1;
+  virtual_torques[1] = (sen_val.theta_y_cpoint * 2.45 + sen_val.theta_y_dot_cpoint * 0.6623) * -1;
 
   virtual_torques[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
