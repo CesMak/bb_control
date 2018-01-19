@@ -2,17 +2,19 @@
 clc;
 clear all;
 
-
 %% Load Model Parameter
-Parameter_flag = 0; 
+Parameter_flag = 3; 
 %syms m_K m_W m_A r_K r_W r_A l Theta_K Theta_W Theta_Wxy Theta_A Theta_Axy phi_x phi_x_dot theta_x theta_x_dot T_x g i 
 syms phi_z phi_z_dot phi_x phi_x_dot phi_y phi_y_dot theta_z theta_z_dot theta_x theta_x_dot theta_y theta_y_dot T_x T_y T_z T_f 
 
 if Parameter_flag == 1
     Parameters_Zuerich
-else 
+elseif Parameter_flag == 2
     Parameters_Group
+else
+    Parameters_Geschaetzt
 end
+
 
 % Arbeitspunkte
 x_AP = [0;0;0;0;0;0];
@@ -30,7 +32,7 @@ gamma=l*m_A+(r_K+r_W)*m_W;
 
 %Matrizen
 M_x=[m_tot*(r_K)^2+Theta_K+(r_K/r_W)^2*Theta_W, -(r_K/(r_W)^2)*r_tot*Theta_W+gamma*r_K*cos(theta_x);
-     -(r_K/(r_W)^2)*r_tot*Theta_W+gamma*r_K*cos(theta_x), ((r_tot)^2/(r_W)^2)*Theta_W+Theta_A+m_A*l^2+m_W*(r_tot)^2];
+     -(r_K/(r_W)^2)*r_tot*Theta_W+gamma*r_K*cos(theta_x), ((r_tot)^2/(r_W)^2)*Theta_W+Theta_A_xx+m_A*l^2+m_W*(r_tot)^2];
  
 C_x=[-r_K*gamma*sin(theta_x)*(theta_x_dot)^2;
      0];
@@ -60,7 +62,7 @@ gamma=l*m_A+(r_K+r_W)*m_W;
 
 %Matrizen
 M_y=[m_tot*(r_K)^2+Theta_K+(r_K/r_W)^2*Theta_W, -(r_K/(r_W)^2)*r_tot*Theta_W+gamma*r_K*cos(theta_y);
-     -(r_K/(r_W)^2)*r_tot*Theta_W+gamma*r_K*cos(theta_y), ((r_tot)^2/(r_W)^2)*Theta_W+Theta_A+m_A*l^2+m_W*(r_tot)^2];
+     -(r_K/(r_W)^2)*r_tot*Theta_W+gamma*r_K*cos(theta_y), ((r_tot)^2/(r_W)^2)*Theta_W+Theta_A_yy+m_A*l^2+m_W*(r_tot)^2];
  
 C_y=[-r_K*gamma*sin(theta_y)*(theta_y_dot)^2;
      0];
@@ -81,8 +83,8 @@ f_NP1_xz=[(r_K/r_W)*T_y;
  
  %% Theta_z_dotdot
  
-T_f=-((r_K*r_W*Theta_Axy*sin(alpha)*T_z)/(r_W^2*Theta_Axy+r_K^2*Theta_Wxy*sin(alpha)^2)); 
-f_xy = -((r_K*sin(alpha)*(r_K*Theta_Wxy*sin(alpha)*T_f +r_W*Theta_K*T_z))/(r_W^2*Theta_Axy*Theta_K+r_K^2*(Theta_Axy+Theta_K)*Theta_Wxy*sin(alpha)^2));
+T_f=-((r_K*r_W*Theta_A_zz*sin(alpha)*T_z)/(r_W^2*Theta_A_zz+r_K^2*Theta_Wxy*sin(alpha)^2)); 
+f_xy = -((r_K*sin(alpha)*(r_K*Theta_Wxy*sin(alpha)*T_f +r_W*Theta_K*T_z))/(r_W^2*Theta_A_zz*Theta_K+r_K^2*(Theta_A_zz+Theta_K)*Theta_Wxy*sin(alpha)^2));
 
 
 %% Zustand
@@ -97,8 +99,10 @@ B_temp=jacobian(sys_nl,u);
 
 A=double(subs(A_temp,[x u],[0 0 0 0 0 0 0 0 0]));
 B=double(subs(B_temp,[x u],[0 0 0 0 0 0 0 0 0]));
-C_xz = eye(3);
-D_xz = [0;0;0];
+C= [1 0 0 0 0 0;
+    0 0 1 0 0 0;
+    0 0 0 0 1 0];
+D= [0;0;0];
 
 %Eigenwerte der Systemmatrix berechnen
 [lambda]=eig(A);
@@ -108,20 +112,27 @@ M_S = ctrb(A,B);
 rank_S = rank(M_S);
 
 
-%% Regler
+%% Regler LQR
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
-Q = [10000 0 0 0 0 0;
-        0 100 0 0 0 0; 
-        0 0 10000 0 0 0;
-        0 0 0 100 0 0;
-        0 0 0 0 100 0;
-        0 0 0 0 0 100];
+Q = [5 0 0 0 0 0;
+        0 10 0 0 0 0; 
+        0 0 5 0 0 0;
+        0 0 0 10 0 0;
+        0 0 0 0 0.1 0;
+        0 0 0 0 0 0.1];
         
-R=[400 0 0;
-    0 400 0;
-    0 0 100];
+R=[20 0 0;
+    0 20 0;
+    0 0 20];
  
 [K, S, lamda_closed] = lqr(A, B, Q, R);
+
+%% Regler Polplatzierung
+
+pole=[-1; -0.5; -1; -0.5; -1.; -0.5]; 
+K_place = place(A,B,pole);
+
+
 
 
