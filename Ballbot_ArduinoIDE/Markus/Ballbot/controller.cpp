@@ -1,3 +1,4 @@
+
 #include "controller.h"
 
 extern BallbotMotorDriver motor_driver;
@@ -74,9 +75,24 @@ bool Controller::imu_init(cIMU sensor, int samples)
       storage_imux += sensor.rpy[1];
       storage_imuy += sensor.rpy[0];
       counter++;
-    if(counter==samples/4)  {Serial.print("IMU INIT 25% finished with current offset: "); Serial.print(storage_imux/(0.25*samples)); Serial.print(" "); Serial.println(storage_imuy/(0.25*samples)); }
-    if(counter==samples/2)  {Serial.print("IMU INIT 50% finished with current offset: "); Serial.print(storage_imux/(0.5*samples)); Serial.print(" "); Serial.println(storage_imuy/(0.5*samples)); }
-    if(counter==3*samples/4){Serial.print("IMU INIT 75% finished with current offset: "); Serial.print(storage_imux/(0.75*samples)); Serial.print(" "); Serial.println(storage_imuy/(0.75*samples)); }
+      if (counter == samples / 4)  {
+        Serial.print("IMU INIT 25% finished with current offset: ");
+        Serial.print(storage_imux / (0.25 * samples));
+        Serial.print(" ");
+        Serial.println(storage_imuy / (0.25 * samples));
+      }
+      if (counter == samples / 2)  {
+        Serial.print("IMU INIT 50% finished with current offset: ");
+        Serial.print(storage_imux / (0.5 * samples));
+        Serial.print(" ");
+        Serial.println(storage_imuy / (0.5 * samples));
+      }
+      if (counter == 3 * samples / 4) {
+        Serial.print("IMU INIT 75% finished with current offset: ");
+        Serial.print(storage_imux / (0.75 * samples));
+        Serial.print(" ");
+        Serial.println(storage_imuy / (0.75 * samples));
+      }
     }
   }
   offset_x = storage_imux / samples;
@@ -86,29 +102,51 @@ bool Controller::imu_init(cIMU sensor, int samples)
   return true;
 }
 
-void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
+
+void Controller::imu_Filter(cIMU sensor)
 {
-  float time_start = millis();
+  // 1. Init step do this only once:
+  if (!init_imu_filter_)
+  {
+    sensor.update();
+    float last_storage_x = sensor.rpy[1] - (offset_x);
+    float last_storage_y = sensor.rpy[0] - (offset_y);
+    float last_storage_z = sensor.rpy[2];
+
+    float storage_x = sensor.rpy[1] - (offset_x);
+    float storage_y = sensor.rpy[0] - (offset_y);
+    float storage_z = sensor.rpy[2];
+    imu_filter = true;
+  }
+
+  sensor.update();
+  storage_x = last_storage_x - ( last_storage_x - sensor.rpy[1] ) * 0.125;
+  storage_y = last_storage_y - ( last_storage_y - sensor.rpy[0] ) * 0.125;
+  storage_z = last_storage_z - ( last_storage_z - sensor.rpy[2] ) * 0.125;
+  last_storage_x = storage_x;
+  last_storage_y = storage_y;
+  last_storage_z = storage_z;
 
   //Theta y,x,z in radiands
-  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1] - (offset_x));
-  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0] - (offset_y));
+  sen_val.theta_x_cpoint = convert2radiand(sensor.rpy[1]);
+  sen_val.theta_y_cpoint = convert2radiand(sensor.rpy[0]);
   sen_val.theta_z_cpoint = convert2radiand(sensor.rpy[2]);
-  float current_theta_arr[3] = {sen_val.theta_x_cpoint, sen_val.theta_y_cpoint, sen_val.theta_z_cpoint};
-  //  sen_val.theta_y_cpoint = current_theta_arr[1];
-  //  sen_val.theta_x_cpoint = current_theta_arr[0];
-  //  sen_val.theta_z_cpoint = current_theta_arr[2];
 
   // Theta_dot y,x,z
   sen_val.theta_y_dot_cpoint = convert2radiand(sensor.gyroData[0] * gRes);
   sen_val.theta_x_dot_cpoint = convert2radiand(sensor.gyroData[1] * gRes);
   sen_val.theta_z_dot_cpoint = convert2radiand(sensor.gyroData[2] * gRes);
+}
 
-  //Psi 1,2,3
-  //Reat out the states of each Wheel.
-  //The states are the current effort, velocity and position.
-  //But not modified
 
+
+void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
+{
+  float time_start = millis();
+
+  imu_Filter(sensor);
+  
+  //dass motor nicht gleich losfährt wegen anfangs IMU offset.
   if ( (abs(sensor.rpy[1] - (offset_x)) < 0.5 && abs(sensor.rpy[0] - (offset_y)) < 0.5) || init_once_)
   {
 
@@ -116,7 +154,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
 
     // Read out wheel states (current[units], velocity, position)
     // CAUTION at least the effort value is only given positive or if negative as 65526
-    int32_t current_effort_RAW[3]   =  {0.0,   0.0, 0.0}; // this is the present current
+    int32_t current_effort_RAW[3]   =  {0.0, 0.0, 0.0}; // this is the present current
     int32_t current_velocity_RAW[3] =  {0.0, 0.0, 0.0};
     int32_t current_position_RAW[3] =  {0.0, 0.0, 0.0};
 
@@ -153,13 +191,13 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);     Serial.print("\t");
 
     Serial.print(current_effort_RAW[0]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T1 * K_EXP);                           Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T1 * K_EXP);                             Serial.print("\t"); // effort in units drauf
     Serial.print(current_effort_RAW[1]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T2 * K_EXP);                           Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T2 * K_EXP);                             Serial.print("\t"); // effort in units drauf
     Serial.print(current_effort_RAW[2]);                         Serial.print("\t"); // effort in units gemessen!
-    Serial.print(ctrl_val.T3 * K_EXP);                           Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T3 * K_EXP);                             Serial.print("\t"); // effort in units drauf
 
-    Serial.print(time_duration);                          
+    Serial.print(time_duration);
     //
     //curr_unit_arr
     Serial.print("\n");
@@ -167,6 +205,20 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   }
 }
 
+
+void Controller::do_Step(BallbotMotorDriver driver)
+{
+  // dead time is around 7ms.
+  int32_t current_effort_RAW[3]   =  {0.0,   0.0, 0.0}; // this is the present current
+  int32_t current_velocity_RAW[3] =  {0.0, 0.0, 0.0};
+  int32_t current_position_RAW[3] =  {0.0, 0.0, 0.0};
+  driver.writeServoConfig(DXM_1_ID, 2 , ADDR_X_GOAL_EFFORT , 100);
+  while (1) {
+    driver.readWheelStates(current_effort_RAW, current_velocity_RAW, current_position_RAW);
+    Serial.print(current_effort_RAW[0]); Serial.print("\t");
+    Serial.println(millis());
+  }
+}
 
 void Controller::x_1D_controller(BallbotMotorDriver driver)
 {
@@ -210,10 +262,10 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   static float* virtual_torques = new float[2];
 
   //Torque in the yz Planar --> T_x
-  virtual_torques[0] = (sen_val.theta_x_cpoint * 14.6965 +  sen_val.theta_x_dot_cpoint * 3.6623) * -1;
+  virtual_torques[0] = (sen_val.theta_x_cpoint * 2.5 +  sen_val.theta_x_dot_cpoint * 0.7623) * -1;
 
   // Torque in the xz Planar --> T_y
-  virtual_torques[1] = (sen_val.theta_y_cpoint *  14.6965 + sen_val.theta_y_dot_cpoint * 3.6623) * -1;
+  virtual_torques[1] = (sen_val.theta_y_cpoint * 2.5 + sen_val.theta_y_dot_cpoint * 0.7623) * -1;
 
   virtual_torques[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
@@ -274,6 +326,31 @@ void Controller::xy_plane2D_controller(BallbotMotorDriver driver)
   ctrl_val.T1 = real_torques[0];
   ctrl_val.T2 = real_torques[1];
   ctrl_val.T3 = real_torques[2];
+}
+
+void Controller::test_IMU_FILTER(cIMU sensor)
+{
+  // 1. Init step:
+  sensor.update();
+  float last_storage_x = sensor.rpy[1];
+  float storage_x = sensor.rpy[1];
+
+  float last_storage_y = sensor.rpy[0];
+  float storage_y = sensor.rpy[0];
+  float last_storage_z = sensor.rpy[2];
+  float storage_z = sensor.rpy[2];
+  while (1)
+  {
+    delay(8);
+    sensor.update();
+    storage_x = last_storage_x - ( last_storage_x - sensor.rpy[1] ) * 0.125;
+    storage_y = last_storage_y - ( last_storage_y - sensor.rpy[0] ) * 0.125;
+    storage_z = last_storage_z - ( last_storage_z - sensor.rpy[2] ) * 0.125;
+    last_storage_x = storage_x;
+    last_storage_y = storage_y;
+    last_storage_z = storage_z;
+    Serial.print(millis()); Serial.print("\t"); Serial.print(sensor.rpy[1]); Serial.print("\t"); Serial.println(storage_x);
+  }
 }
 
 float  *Controller::computePsiDot(float omega_arr[])

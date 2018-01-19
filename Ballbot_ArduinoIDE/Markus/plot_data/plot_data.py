@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("data.txt","r")
+    c=open("filter8","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
@@ -45,10 +45,16 @@ def print_wheel(input_line):
     plt.show()
     print(vec)
 
+def print_IMU_FILTER_TEST(input_values):
+    plt.plot(input_values[:,0],input_values[:,1],label="ungefiltert")
+    plt.plot(input_values[:,0],input_values[:,2],label="gefiltert")
+    plt.legend()
+    plt.show()
 
 
 tmp = read_values()
-print_theta(tmp)
+print_IMU_FILTER_TEST(tmp)
+#print_theta(tmp)
 #print_wheel(tmp)
 
 

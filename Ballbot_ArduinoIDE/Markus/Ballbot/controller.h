@@ -10,13 +10,13 @@
 
 #include "ballbot_motor_driver.h"
 
-#define SAMPL_TIME  10000      // in microseconds
-
+#define SAMPL_TIME  10000      // in microseconds // if this value is low noise is increased! 
+                               // Dead time is around 7ms!
 #define A_PBZ       -2.660
-#define K_EXP        40 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
+#define K_EXP        222 // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
 
-#define ALPHA       PI/4
-#define BETA        PI/3
+#define ALPHA       PI/4            // je nach balldurchmesser unterschiedlich groß! siehe P. 33
+#define BETA        -2*PI/3          // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
 #define RK          0.07
 #define RW          0.03
 
@@ -132,6 +132,8 @@ class Controller
   float offset_y;
 
   bool init_once_;
+
+  bool init_imu_filter_;
   
   Controller();
   ~Controller();
@@ -153,6 +155,8 @@ class Controller
   void xy_plane2D_controller(BallbotMotorDriver driver);
   void xyz_2D_controller(BallbotMotorDriver driver);
   void x_1D_controller(BallbotMotorDriver driver);
+  void do_Step(BallbotMotorDriver driver);
+  void test_IMU_FILTER(cIMU sensor);
   
 };
 
