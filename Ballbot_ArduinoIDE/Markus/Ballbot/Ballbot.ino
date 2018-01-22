@@ -14,10 +14,10 @@ void setup()
   }
 
   Serial.println("Start initialization");
+  controller.init();
   imu.begin();
   //controller.test_IMU_FILTER(imu);
   controller.imu_init(imu, 100);
-  controller.init();
   motor_driver.init();
   Serial.println("End initialization");
 
