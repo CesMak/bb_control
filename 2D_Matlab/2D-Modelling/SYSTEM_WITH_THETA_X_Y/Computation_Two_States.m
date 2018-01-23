@@ -13,7 +13,7 @@ if Parameter_flag == 0
     Theta_A_yy = Theta_A;
 elseif Parameter_flag == 2
     Parameters_Group
-else
+elseif Parameter_flag == 1
     Parameters_Geschaetzt
 end
 
