@@ -18,10 +18,10 @@
 #define K_EXP       39        // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
 #define ALPHA       0.63879   // 36.6° je nach balldurchmesser unterschiedlich groß! siehe P. 33 markus gemessen für gelben ball zu 40° und mittelstellung der arme
 #define BETA        -2*PI/3   // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
-#define K1          15 // theta x
-#define K2          3 // theta x dot
-#define K3          7
-#define K4          2
+#define K1          -82.1341 // theta x
+#define K2          -16.7913 // theta x dot
+#define K3          -82.1341
+#define K4          -16.7913
 #define COS_ALPHA   cos(ALPHA)       // in rad.
 #define SIN_ALPHA   sin(ALPHA)
 #define SIN_BETA    -0.86602540378
