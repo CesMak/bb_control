@@ -16,21 +16,12 @@
 #define FILTER_FAK  0.125     // ETHZ: 15 HZ rausfiltern das passt mit dem hier aber nicht überein! wenn wert auf 1 filter ist aus; für T=10ms & FilterFAK = 0.125 ca. 13HZ Cuttoff freq.
 #define USE_FILTER  false     // =true -> use filtered value to apply torques  =false -> use unfiltered gyro and angle values to apply torques.
 #define K_EXP       39        // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
-<<<<<<< HEAD
 #define ALPHA       PI/4      // 45° ist nur von Konstruktion Abhängig sollte auf Ballgröße angepasst werden.
 #define BETA        PI        // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
 #define K1          0         // tune phi_x, phi_y, set to zero if you do not wanna use the ball's odometry  -0.3162
 #define K2          10        // tune theta_x, theta_y, set to zero if you do not wanna use the ball's odometry
 #define K3          0         // tune dphi_x, dphi_y, set to zero if you do not wanna use the ball's odometry  -0.3991
 #define K4          3         // tune dtheta_x, dtheta_y, set to zero if you do not wanna use the ball's odometry
-=======
-#define ALPHA       0.63879   // 36.6° je nach balldurchmesser unterschiedlich groß! siehe P. 33 markus gemessen für gelben ball zu 40° und mittelstellung der arme
-#define BETA        -2*PI/3   // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
-#define K1          -82.1341 // theta x
-#define K2          -16.7913 // theta x dot
-#define K3          -82.1341
-#define K4          -16.7913
->>>>>>> 7818f886e65a7855cb838e71de2e084e5be7f618
 #define COS_ALPHA   cos(ALPHA)       // in rad.
 #define SIN_ALPHA   sin(ALPHA)
 #define SIN_BETA    sin(BETA)

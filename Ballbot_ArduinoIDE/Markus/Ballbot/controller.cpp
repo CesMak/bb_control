@@ -279,17 +279,10 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   static float* torques_on_motors = new float[2];
 
   // Torque in the yz Planar --> T_x
-<<<<<<< HEAD
   virtual_torques[0] = (sen_val.phi_actual_[0] * K1 + sen_val.theta_x_cpoint * K2 + sen_val.dphi_[0] * K3 + sen_val.theta_x_dot_cpoint * K4 ) * -1;
 
   // Torque in the xz Planar --> T_y
   virtual_torques[1] = (sen_val.phi_actual_[1] * K1 + sen_val.theta_y_cpoint * K2 + sen_val.dphi_[1] * K3 + sen_val.theta_y_dot_cpoint * K4 ) * -1;
-=======
-  virtual_torques[0] = (sen_val.theta_x_cpoint * K1 +  sen_val.theta_x_dot_cpoint); // * K2 + sen_val.phi_x_dot_cpoint*K5) * -1;
-
-  // Torque in the xz Planar --> T_y
-  virtual_torques[1] = (sen_val.theta_y_cpoint * K3 + sen_val.theta_y_dot_cpoint *  K4) ; //+ sen_val.phi_y_dot_cpoint*K6) * -1;
->>>>>>> 7818f886e65a7855cb838e71de2e084e5be7f618
 
   virtual_torques[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
