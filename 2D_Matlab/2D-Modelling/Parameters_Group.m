@@ -1,30 +1,39 @@
-%Massen
-m_K = 0.4;
-m_W = 0.384; 
-m_A = 1.646;
-
-%Radien und Längen
-r_K = 0.08; 
-r_W = 0.03;
-r_A = 0.0703; 
-l = 0.24045;
-h = 0.34294;
-
-%Trägheitsmomente
-Theta_K = 0.00131; 
-Theta_A = 0.088; 
-Theta_Axy = 0.00239; 
-Theta_W = 0.058873; 
-Theta_Wxy = 0.16656;
+%Winkel
+alpha = pi/4; 
+beta = 0; 
 
 
 %Allgemeine Konstanten
 g=9.81; 
-i=353.5; 
+i=353.5;
 
-%Winkel
-alpha = pi/4; 
-beta = (-2*pi)/3; 
-beta_1 = 0; 
-beta_2 = (2*pi)/3;
-beta_3 = (4*pi)/3;
+
+%Massen
+m_s = 0.325;
+m_w = 0.134; 
+m_b = 1.603;
+
+%Radien und Längen
+r_s = 0.08; 
+r_w = 0.03;
+r_b = 0.0703; 
+l = 0.220;
+h = 0.353; %von Ballmittel
+
+%Trägheitsmomente (berechnet nach ETHZ)
+I_b = 0.1794;
+%I_b=0.088;
+%I_w = 0.00236;
+I_w = 3.579e-3;
+I_w_xy = 0.0143; 
+I_s = 0.001386;
+
+%Trägheitsmomente (abgelesen SolidEdge)
+I_b_x = 0.088; 
+I_b_y = 0.087;
+I_b_xy = 0.007; 
+%I_w = 2.36e-3;  
+%I_s = 0.001386;  
+
+
+
