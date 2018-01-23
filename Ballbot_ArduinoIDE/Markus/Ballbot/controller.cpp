@@ -37,6 +37,20 @@ void Controller::init(void)
 
   custom_offset_x = 0.6; // in grad!
   custom_offset_x = -2;
+
+  sen_val.psi_actual_ = new float[3];
+  sen_val.psi_last_   = new float[3];
+  sen_val.phi_actual_ = new float[3];
+  sen_val.phi_last_   = new float[3];
+  sen_val.dphi_       = new float[3];
+
+  for(int i = 0;i<3;i++){
+      sen_val.psi_actual_[i] = 0.0;
+      sen_val.psi_last_[i]   = 0.0;
+      sen_val.phi_actual_[i] = 0.0;
+      sen_val.phi_last_[i]   = 0.0;
+      sen_val.dphi_[i]       = 0.0;
+  }
 }
 
 bool Controller::imu_init(cIMU sensor, int samples)
@@ -44,7 +58,6 @@ bool Controller::imu_init(cIMU sensor, int samples)
   // with samples you can adjust how long the init process will last.
   float storage_imux = 0.0;
   float storage_imuy = 0.0;
-
 
   static uint32_t tTime = 0;
   int counter = 0;
@@ -177,14 +190,15 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     imu_Filter(sensor);
     init_once_ = true;
 
-    // Read out wheel states (current[units], velocity, position)
+    // Read out wheel states (current[units], velocity, position[absolut])
     // CAUTION at least the effort value is only given positive or if negative as 65526
     int32_t current_effort_RAW[3]   =  {0.0, 0.0, 0.0}; // this is the present current
     int32_t current_velocity_RAW[3] =  {0.0, 0.0, 0.0};
     int32_t current_position_RAW[3] =  {0.0, 0.0, 0.0};
 
     driver.readWheelStates(current_effort_RAW, current_velocity_RAW, current_position_RAW); // this step costs 3ms!!!
-
+    calc_odometry(current_velocity_RAW);
+    
     // convert negative values of current_effort_RAW:
     if (current_effort_RAW[0] > 10000) {
       current_effort_RAW[0] = current_effort_RAW[0] - 65536;
@@ -195,6 +209,8 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     if (current_effort_RAW[2] > 10000) {
       current_effort_RAW[2] = current_effort_RAW[2] - 65536;
     }
+
+    
 
     // Execute Controller
     xyz_2D_controller(driver); // lasts 3ms the write wheel states lasts that long!
@@ -207,32 +223,32 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
       tmp = K_EXP;
     }
     
-    Serial.print(time_end / 1000);                                            Serial.print("\t"); // sec
-    Serial.print(sen_val.theta_x_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t"); // °
-    Serial.print(sen_val.theta_x_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t"); // °/sec
-    Serial.print(sen_val.theta_y_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t");
-    Serial.print(sen_val.theta_y_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t");
-
-    Serial.print(sen_val.theta_x_cpoint * 180 / 3.14159);                     Serial.print("\t"); // °
-    Serial.print(sen_val.theta_x_dot_cpoint * 180 / 3.14159);                 Serial.print("\t"); // °/sec
-    Serial.print(sen_val.theta_y_cpoint * 180 / 3.14159);                     Serial.print("\t");
-    Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);                 Serial.print("\t");
-
-    Serial.print(ctrl_val.T1*tmp);                                         Serial.print("\t"); // effort in units drauf //9
-    Serial.print(ctrl_val.T2*tmp);                                         Serial.print("\t"); // effort in units drauf
-    Serial.print(ctrl_val.T3*tmp);                                         Serial.print("\t"); // effort in units drauf
-    Serial.print(ctrl_val.T1_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
-    Serial.print(ctrl_val.T2_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
-    Serial.print(ctrl_val.T3_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
-
-    // gemessener Wert:
-    Serial.print(current_effort_RAW[0]);                              Serial.print("\t"); // effort in units gemessen!
-    Serial.print(current_effort_RAW[1]);                              Serial.print("\t"); // effort in units gemessen!
-    Serial.print(current_effort_RAW[2]);                              Serial.print("\t"); // effort in units gemessen!
-
-    Serial.print(time_duration);
-
-    Serial.print("\n");
+//    Serial.print(time_end / 1000);                                            Serial.print("\t"); // sec
+//    Serial.print(sen_val.theta_x_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t"); // °
+//    Serial.print(sen_val.theta_x_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t"); // °/sec
+//    Serial.print(sen_val.theta_y_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t");
+//    Serial.print(sen_val.theta_y_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t");
+//
+//    Serial.print(sen_val.theta_x_cpoint * 180 / 3.14159);                     Serial.print("\t"); // °
+//    Serial.print(sen_val.theta_x_dot_cpoint * 180 / 3.14159);                 Serial.print("\t"); // °/sec
+//    Serial.print(sen_val.theta_y_cpoint * 180 / 3.14159);                     Serial.print("\t");
+//    Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);                 Serial.print("\t");
+//
+//    Serial.print(ctrl_val.T1*tmp);                                         Serial.print("\t"); // effort in units drauf //9
+//    Serial.print(ctrl_val.T2*tmp);                                         Serial.print("\t"); // effort in units drauf
+//    Serial.print(ctrl_val.T3*tmp);                                         Serial.print("\t"); // effort in units drauf
+//    Serial.print(ctrl_val.T1_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
+//    Serial.print(ctrl_val.T2_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
+//    Serial.print(ctrl_val.T3_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
+//
+//    // gemessener Wert:
+//    Serial.print(current_effort_RAW[0]);                              Serial.print("\t"); // effort in units gemessen!
+//    Serial.print(current_effort_RAW[1]);                              Serial.print("\t"); // effort in units gemessen!
+//    Serial.print(current_effort_RAW[2]);                              Serial.print("\t"); // effort in units gemessen!
+//
+//    Serial.print(time_duration);
+//
+//    Serial.print("\n");
   }
 
 }
@@ -263,10 +279,10 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   static float* torques_on_motors = new float[2];
 
   // Torque in the yz Planar --> T_x
-  virtual_torques[0] = (sen_val.theta_x_cpoint * K1 +  sen_val.theta_x_dot_cpoint * K2) * -1;
+  virtual_torques[0] = (sen_val.phi_actual_[0] * K1 + sen_val.theta_x_cpoint * K2 + sen_val.dphi_[0] * K3 + sen_val.theta_x_dot_cpoint * K4 ) * -1;
 
   // Torque in the xz Planar --> T_y
-  virtual_torques[1] = (sen_val.theta_y_cpoint * K3 + sen_val.theta_y_dot_cpoint *  K4) * -1;
+  virtual_torques[1] = (sen_val.phi_actual_[1] * K1 + sen_val.theta_y_cpoint * K2 + sen_val.dphi_[1] * K3 + sen_val.theta_y_dot_cpoint * K4 ) * -1;
 
   virtual_torques[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
@@ -278,8 +294,8 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   ctrl_val.T3 = real_torques[2];
 
   // Berechne Werte ohne Filter:
-  virtual_torques_ohne_Filter[0] = (sen_val.theta_x_cpoint_ohne_Filter * K1 +  sen_val.theta_x_dot_cpoint_ohne_Filter * K2) * -1;
-  virtual_torques_ohne_Filter[1] = (sen_val.theta_y_cpoint_ohne_Filter * K3 + sen_val.theta_y_dot_cpoint_ohne_Filter *  K4) * -1;
+  virtual_torques_ohne_Filter[0] = (sen_val.phi_actual_[0] * K1 + sen_val.theta_x_cpoint * K2 + sen_val.dphi_[0] * K3 + sen_val.theta_x_dot_cpoint * K4 ) * -1;
+  virtual_torques_ohne_Filter[1] = (sen_val.phi_actual_[1] * K1 + sen_val.theta_y_cpoint * K2 + sen_val.dphi_[1] * K3 + sen_val.theta_y_dot_cpoint * K4 ) * -1;
   virtual_torques_ohne_Filter[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
   real_torques_ohne_Filter[0] = 0.333333333 * (virtual_torques_ohne_Filter[2] + (2 / COS_ALPHA) * (virtual_torques_ohne_Filter[0] * COS_BETA - virtual_torques_ohne_Filter[1] * SIN_BETA));
@@ -320,6 +336,58 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   driver.writeServoConfig(DXM_3_ID, 2 , ADDR_X_GOAL_EFFORT , curr_unit_arr[2]);
 }
 
+void Controller::calc_odometry(int32_t velocity_RAW[])
+{
+    // 0. Convert the velocity from units in rad per second
+    // 1 Unit = 0.229[RPM]
+    float velocity_rad_s[] = {0.0, 0.0, 0.0};
+    float dpsi[] = {0.0, 0.0, 0.0};
+    for(int i = 0; i<3; i++)
+    {
+      velocity_rad_s[i]= velocity_RAW[i] * 0.229 * (2*PI)/60;
+    }
+    Serial.print("velocity_rad_s_0:  "); Serial.println(velocity_rad_s[0]);
+    
+    // 1. Convert dpsi_1,2,3 -> dpsi_x,y,z
+    // 1.A dpsix = dpsi1 / cos (alpha) P.71
+    // 1.B dpsiy = dpsi3 * 2 / (sqrt(3) *cos(alpha))
+    // 1.C dpsiz = dpsi1/sin(alpha)
+    // diese Formeln sind nicht richtig! hängt noch von Beta ab und Formeln müssen evtl. summiert werden.
+    // 
+    dpsi[0]= velocity_rad_s[0]/(cos(ALPHA));
+    dpsi[1]= velocity_rad_s[2]/(cos(ALPHA)*SQRT3);
+    dpsi[2]= velocity_rad_s[1]/(sin(ALPHA));
+
+    Serial.print("dpsi_0:  "); Serial.println(dpsi[0]);
+
+    // 2. Use dpsi_x,y,z -> psi_x,y,z (INTEGRATE)
+    // psi_k = psi_k-1 + dpsi * sample_time
+    // Integration like ETHZ: see: https://en.wikipedia.org/wiki/Trapezoidal_rule
+    sen_val.psi_actual_[0] = sen_val.psi_last_[0] + SAMPL_TIME*pow(10,-6)* dpsi[0];
+    sen_val.psi_actual_[1] = sen_val.psi_last_[1] + SAMPL_TIME*pow(10,-6)* dpsi[1];
+    sen_val.psi_actual_[2] = sen_val.psi_last_[2] + SAMPL_TIME*pow(10,-6)* dpsi[2];
+
+    Serial.print("sen_val.psi_actual_[0]:  "); Serial.println(sen_val.psi_actual_[0]);
+    Serial.print("sen_val.psi_last_[0]:  "); Serial.println(sen_val.psi_last_[0]);
+
+    // 3. psi_x,y,z -> dphi_x,y,z P. 8
+    sen_val.dphi_[0]=(dpsi[0]+sen_val.theta_x_dot_cpoint_ohne_Filter)*RW/RK+sen_val.theta_x_dot_cpoint_ohne_Filter;
+    sen_val.dphi_[1]=(dpsi[1]+sen_val.theta_y_dot_cpoint_ohne_Filter)*RW/RK+sen_val.theta_y_dot_cpoint_ohne_Filter;
+    sen_val.dphi_[2]=(dpsi[2]/sin(ALPHA))*RW/RK+sen_val.theta_z_dot_cpoint_ohne_Filter;
+
+    // 4. dphi_x,y,z -> phi_x,y,z (integrate it!)                  
+    sen_val.phi_actual_[0] = sen_val.phi_last_[0]+SAMPL_TIME*pow(10,-6)*sen_val.dphi_[0];
+    sen_val.phi_actual_[1] = sen_val.phi_last_[0]+SAMPL_TIME*pow(10,-6)*sen_val.dphi_[1];
+    sen_val.phi_actual_[2] = sen_val.phi_last_[0]+SAMPL_TIME*pow(10,-6)*sen_val.dphi_[2];
+
+    Serial.print("sen_val.dphi_[0]:  "); Serial.println(sen_val.dphi_[0]);    
+    Serial.print("sen_val.phi_actual_[0]:  "); Serial.println(sen_val.phi_actual_[0]);
+    Serial.print("sen_val.phi_last_[0]:  ");   Serial.println(sen_val.phi_last_[0]);
+
+    
+    sen_val.psi_last_ = sen_val.psi_actual_;
+    sen_val.phi_last_ = sen_val.phi_actual_;
+}
 
 
 float* Controller::torques_filter(float real_torques[], bool use_filter)
@@ -373,8 +441,7 @@ void Controller::test_IMU_FILTER(cIMU sensor)
 
 float Controller::convert2radiand(float val_deg)
 {
-  float temp_var = (val_deg * PI) / 180;
-  return temp_var;
+  return (val_deg * PI) / 180;
 }
 
 int *Controller::compute2currentunits(float real_torques_arr[]) {

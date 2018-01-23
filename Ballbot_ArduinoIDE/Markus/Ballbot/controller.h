@@ -14,33 +14,25 @@
 // Current Used Constants:
 #define SAMPL_TIME  7000      // in microseconds // if this value is low noise is increased!  // Dead time is around 7ms! of the motors
 #define FILTER_FAK  0.125     // ETHZ: 15 HZ rausfiltern das passt mit dem hier aber nicht überein! wenn wert auf 1 filter ist aus; für T=10ms & FilterFAK = 0.125 ca. 13HZ Cuttoff freq.
-#define USE_FILTER  false         // =true -> use filtered value to apply torques  =false -> use unfiltered gyro and angle values to apply torques.
+#define USE_FILTER  false     // =true -> use filtered value to apply torques  =false -> use unfiltered gyro and angle values to apply torques.
 #define K_EXP       39        // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
-#define ALPHA       0.63879   // 36.6° je nach balldurchmesser unterschiedlich groß! siehe P. 33 markus gemessen für gelben ball zu 40° und mittelstellung der arme
-#define BETA        -2*PI/3   // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
-#define K1          15 // theta x
-#define K2          3 // theta x dot
-#define K3          7
-#define K4          2
+#define ALPHA       PI/4      // 45° ist nur von Konstruktion Abhängig sollte auf Ballgröße angepasst werden.
+#define BETA        PI        // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
+#define K1          0         // tune phi_x, phi_y, set to zero if you do not wanna use the ball's odometry  -0.3162
+#define K2          10        // tune theta_x, theta_y, set to zero if you do not wanna use the ball's odometry
+#define K3          0         // tune dphi_x, dphi_y, set to zero if you do not wanna use the ball's odometry  -0.3991
+#define K4          3         // tune dtheta_x, dtheta_y, set to zero if you do not wanna use the ball's odometry
 #define COS_ALPHA   cos(ALPHA)       // in rad.
 #define SIN_ALPHA   sin(ALPHA)
-#define SIN_BETA    -0.86602540378
-#define COS_BETA    -0.5
+#define SIN_BETA    sin(BETA)
+#define COS_BETA    cos(BETA)
 #define SQRT3       1.73205080757
 #define PRINT_TORQUES true  // if print as torques if false pritn as units!
 #define USE_CUSTOM_OFFSET false  // use this offset!
-
-#define RK          0.07
-#define RW          0.03
-
-//#define DEBUG_SEN
-//#define DEBUG_ANGLE
-//#define DEBUG_VELOCITY
-//#define DEBUG_PSI
-//#define DEBUG_PSI_DOT
+#define RK         0.08    // radius of ball in meter
+#define RW         0.03    // radius of omni-wheel in meter
 
 struct sensor_values {
-
   float theta_x_cpoint;
   float theta_y_cpoint;
   float theta_z_cpoint;
@@ -53,9 +45,17 @@ struct sensor_values {
   float theta_y_cpoint_ohne_Filter;
   float theta_z_cpoint_ohne_Filter;
 
-  float theta_y_dot_cpoint_ohne_Filter;
   float theta_x_dot_cpoint_ohne_Filter;
+  float theta_y_dot_cpoint_ohne_Filter;
   float theta_z_dot_cpoint_ohne_Filter;
+
+  // Odometry: 
+  float *psi_actual_;
+  float *psi_last_;
+
+  float *dphi_;
+  float *phi_actual_;
+  float *phi_last_;
 };
 
 
@@ -128,6 +128,7 @@ class Controller
     void test_IMU_FILTER(cIMU sensor);
     void imu_Filter(cIMU sensor);
     float *torques_filter(float real_torques[], bool use_filter);
+    void calc_odometry(int32_t velocity_RAW[]);
 
 };
 
