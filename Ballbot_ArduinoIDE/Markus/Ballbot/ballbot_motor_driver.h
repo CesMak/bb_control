@@ -84,7 +84,7 @@ class BallbotMotorDriver
   bool readWheelStates(int32_t wheel_effort_values[], int32_t wheel_velocity_values[], int32_t wheel_position_values[]);
   void referenzFahrt(void);
 
-  void changeMode(uint16_t new_mode);
+  void change_all_Modes(uint16_t new_mode);
 
   bool writeBaudrate(int newBaud);
 

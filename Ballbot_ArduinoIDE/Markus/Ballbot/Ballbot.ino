@@ -13,18 +13,20 @@ void setup()
   while (!Serial) {
   }
 
+  motor_driver.init();
+  //Change mode to current Control Mode:
+  motor_driver.change_all_Modes(0);
+
   Serial.println("Start initialization");
   controller.init();
   imu.begin();
   //controller.test_IMU_FILTER(imu);
   controller.imu_init(imu, 100);
-  motor_driver.init();
   Serial.println("End initialization");
 
-  //motor_driver.referenzFahrt();
+  motor_driver.referenzFahrt();
 
-  //Change mode to current Control Mode:
-  motor_driver.changeMode(0);
+
   
   delay(1000);
 
