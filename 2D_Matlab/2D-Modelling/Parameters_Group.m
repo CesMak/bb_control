@@ -21,8 +21,10 @@ l = 0.220;              %Distanz von Schwerpunkt Körper zu Ballmittelpunkt
 h = 0.353;              %Distanz von höchsten Punkt Körper zu Ballmittelpunkt
 
 %Trägheitsmomente (berechnet nach ETHZ)
-I_b = 0.1794;           %Masseträgheitsmoment Körper (inkl. virtuellem Rad) (xz/yz)-->Formel ETHZ
-%I_b=0.088;             %Masseträgheitsmoment Körpoer (inkl.virtuellem Rad) (xz/yz)--> SolidEdge
+%I_b = 0.1794;           %Masseträgheitsmoment Körper (inkl. virtuellem Rad) (xz/yz)-->Formel ETHZ
+I_b=0.088;               %Masseträgheitsmoment Körper (inkl.virtuellem Rad) (xz/yz)--> SolidEdge
+I_b_xy = 0.00396;        %Massenträgheitsmoment Körper (inkl. virtuellem Rad) (xy) --> Formel ETHZ
+
 
 %I_w = 0.00236;         %Masseträgheitsmoment virtuelles Rad(yz/xz) --> Formel ETHZ
 I_w = 3.579e-3;         %Masseträgheitsmoment virtuelles Rad(yz/xz) --> I_M = 3.8e-8
@@ -30,11 +32,10 @@ I_w_xy = 0.0143;        %Masseträgheitsmoment virtuelles Rad(xz) --> Formel ETHZ
 I_s = 0.001386;         %Masseträgheitsmoment Ball --> Formel ETHZ
 
 %Trägheitsmomente (abgelesen SolidEdge)
-I_b_x = 0.088; 
-I_b_y = 0.087;
-I_b_xy = 0.007; 
-%I_w = 2.36e-3;  
-%I_s = 0.001386;  
+I_b_x = 0.088;          %Masseträgheitsmoment Körpoer (inkl.virtuellem Rad) (yz)--> SolidEdge
+I_b_y = 0.087;          %Masseträgheitsmoment Körpoer (inkl.virtuellem Rad) (xz)--> SolidEdge
+I_b_z = 0.007;         %Masseträgheitsmoment Körpoer (inkl.virtuellem Rad) (xy)--> SolidEdge 
+ 
 
 
 
