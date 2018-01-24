@@ -3,10 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("filter_compare_test_units3","r")
+    c=open("Motor_Torques.txt","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
+
     # Angles:
     f, axarr = plt.subplots(2, sharex=True)
     axarr[0].plot(input_values[:,0],input_values[:,1],label="theta_x")
@@ -116,12 +117,30 @@ def compare_filter(input_values):
     axarr3[2].legend()
 
     plt.show()
+	
+	
+def print_torques(input_values):
+    f, axarr = plt.subplots(3, sharex=True)
+    axarr[0].plot(input_values[:,0],input_values[:,1],label="Motor 1")
+    axarr.flat[0].set(xlabel="t in sec", ylabel="Nm")
+    axarr[0].legend()
+
+    axarr[1].plot(input_values[:,0],input_values[:,2],label="Motor 2")
+    axarr.flat[1].set(xlabel="t in sec", ylabel="Nm")
+    axarr[1].legend()
+
+    axarr[2].plot(input_values[:,0],input_values[:,3],label="t3_mit_filter")
+    axarr.flat[2].set(xlabel="t in sec", ylabel="Nm")
+    axarr[2].legend()
+
+    plt.show()
 
 tmp = read_values()
+print_torques(tmp)
 #print_IMU_FILTER_TEST(tmp)
 #print_theta(tmp)
 #print_wheel(tmp)
-compare_filter(tmp)
+#compare_filter(tmp)
 
 
 #Ergebnisse für leerlauf:
