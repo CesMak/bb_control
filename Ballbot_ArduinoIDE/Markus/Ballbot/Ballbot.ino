@@ -12,21 +12,19 @@ void setup()
   Serial.begin(115200);
   while (!Serial) {
   }
-
-  motor_driver.init();
-  //Change mode to current Control Mode:
-  motor_driver.change_all_Modes(0);
-
+  
   Serial.println("Start initialization");
   controller.init();
-  imu.begin();
+  imu.begin(); // update IMU with 200Hz = 5ms damit neuer wert != alter wert
   //controller.test_IMU_FILTER(imu);
   controller.imu_init(imu, 100);
+  motor_driver.init();
   Serial.println("End initialization");
 
-  motor_driver.referenzFahrt();
+  //motor_driver.referenzFahrt(); // required for odometry!
 
-
+  //Change mode to current Control Mode:
+  motor_driver.change_all_Modes(0);
   
   delay(1000);
 
@@ -57,4 +55,7 @@ void executeController(void)
 // Notes:
 // The IMU's orientation is calculated by using the acc and the angular vel (gyro data) as well as the magnetometer.
 // as input of the Madgwick Library (see: https://github.com/arduino-libraries/MadgwickAHRS)
+// The motors we use are the: http://support.robotis.com/en/product/actuator/dynamixel_x/xm_series/xm430-w350.htm#bookmark2
+// Firmware version: 41
+// We set the Drive Mode of all Motors to REVERSE (1) as the motors are turned in our case!
 

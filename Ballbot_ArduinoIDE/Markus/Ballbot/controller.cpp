@@ -99,7 +99,7 @@ bool Controller::imu_init(cIMU sensor, int samples)
   }
   else{
   offset_x = storage_imux / samples;
-  offset_y = storage_imuy / samples;
+  offset_y = storage_imuy / samples +0.8; // TODO: Additional offset angle from center of gravity to imu
   }
 
   Serial.print("IMU INIT 100% finished with offset: "); Serial.print(offset_x); Serial.print(" y: "); Serial.println(offset_y);
@@ -185,7 +185,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
   float time_start = millis();
 
   //dass motor nicht gleich losfährt wegen anfangs IMU offset.
-  if ( (abs(sensor.rpy[1] - (offset_x)) < 0.3 && abs(sensor.rpy[0] - (offset_y)) < 0.3) || init_once_ || USE_CUSTOM_OFFSET)
+  if ( (abs(sensor.rpy[1] - (offset_x)) < 5 && abs(sensor.rpy[0] - (offset_y)) < 5) || init_once_ || USE_CUSTOM_OFFSET)
   {
     imu_Filter(sensor);
     init_once_ = true;
@@ -197,7 +197,7 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
     int32_t current_position_RAW[3] =  {0.0, 0.0, 0.0};
 
     driver.readWheelStates(current_effort_RAW, current_velocity_RAW, current_position_RAW); // this step costs 3ms!!!
-    calc_odometry(current_velocity_RAW);
+    //calc_odometry(current_velocity_RAW);
     
     // convert negative values of current_effort_RAW:
     if (current_effort_RAW[0] > 10000) {
@@ -217,38 +217,42 @@ void Controller::readIMU(cIMU sensor, BallbotMotorDriver driver)
 
     float time_end = millis();
     float time_duration = time_end - time_start;
-    float tmp = 1;
+    float tmp1 = 1;
+    float tmp2 = 1;
+    float tmp3 = 1;
     if(!PRINT_TORQUES)
     {
-      tmp = K_EXP;
+      tmp1 = K_M1; 
+      tmp2 = K_M2; 
+      tmp3 = K_M3; 
     }
     
-//    Serial.print(time_end / 1000);                                            Serial.print("\t"); // sec
-//    Serial.print(sen_val.theta_x_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t"); // °
-//    Serial.print(sen_val.theta_x_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t"); // °/sec
-//    Serial.print(sen_val.theta_y_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t");
-//    Serial.print(sen_val.theta_y_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t");
-//
-//    Serial.print(sen_val.theta_x_cpoint * 180 / 3.14159);                     Serial.print("\t"); // °
-//    Serial.print(sen_val.theta_x_dot_cpoint * 180 / 3.14159);                 Serial.print("\t"); // °/sec
-//    Serial.print(sen_val.theta_y_cpoint * 180 / 3.14159);                     Serial.print("\t");
-//    Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);                 Serial.print("\t");
-//
-//    Serial.print(ctrl_val.T1*tmp);                                         Serial.print("\t"); // effort in units drauf //9
-//    Serial.print(ctrl_val.T2*tmp);                                         Serial.print("\t"); // effort in units drauf
-//    Serial.print(ctrl_val.T3*tmp);                                         Serial.print("\t"); // effort in units drauf
-//    Serial.print(ctrl_val.T1_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
-//    Serial.print(ctrl_val.T2_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
-//    Serial.print(ctrl_val.T3_ohne_Filter*tmp);                             Serial.print("\t"); // effort in units drauf
-//
-//    // gemessener Wert:
-//    Serial.print(current_effort_RAW[0]);                              Serial.print("\t"); // effort in units gemessen!
-//    Serial.print(current_effort_RAW[1]);                              Serial.print("\t"); // effort in units gemessen!
-//    Serial.print(current_effort_RAW[2]);                              Serial.print("\t"); // effort in units gemessen!
-//
-//    Serial.print(time_duration);
-//
-//    Serial.print("\n");
+    Serial.print(time_end / 1000);                                            Serial.print("\t"); // sec
+    Serial.print(sen_val.theta_x_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t"); // °
+    Serial.print(sen_val.theta_x_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t"); // °/sec
+    Serial.print(sen_val.theta_y_cpoint_ohne_Filter * 180 / 3.14159);         Serial.print("\t");
+    Serial.print(sen_val.theta_y_dot_cpoint_ohne_Filter * 180 / 3.14159);     Serial.print("\t");
+
+    Serial.print(sen_val.theta_x_cpoint * 180 / 3.14159);                     Serial.print("\t"); // °
+    Serial.print(sen_val.theta_x_dot_cpoint * 180 / 3.14159);                 Serial.print("\t"); // °/sec
+    Serial.print(sen_val.theta_y_cpoint * 180 / 3.14159);                     Serial.print("\t");
+    Serial.print(sen_val.theta_y_dot_cpoint * 180 / 3.14159);                 Serial.print("\t");
+
+    Serial.print(ctrl_val.T1*tmp1);                                         Serial.print("\t"); // effort in units drauf //9
+    Serial.print(ctrl_val.T2*tmp2);                                         Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T3*tmp3);                                         Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T1_ohne_Filter*tmp1);                             Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T2_ohne_Filter*tmp2);                             Serial.print("\t"); // effort in units drauf
+    Serial.print(ctrl_val.T3_ohne_Filter*tmp3);                             Serial.print("\t"); // effort in units drauf
+
+    // gemessener Wert:
+    Serial.print(current_effort_RAW[0]);                              Serial.print("\t"); // effort in units gemessen!
+    Serial.print(current_effort_RAW[1]);                              Serial.print("\t"); // effort in units gemessen!
+    Serial.print(current_effort_RAW[2]);                              Serial.print("\t"); // effort in units gemessen!
+
+    Serial.print(time_duration);
+
+    Serial.print("\n");
   }
 
 }
@@ -279,10 +283,10 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   static float* torques_on_motors = new float[2];
 
   // Torque in the yz Planar --> T_x
-  virtual_torques[0] = (sen_val.phi_actual_[0] * K1 + sen_val.theta_x_cpoint * K2 + sen_val.dphi_[0] * K3 + sen_val.theta_x_dot_cpoint * K4 ) * -1;
+  virtual_torques[0] = (sen_val.phi_actual_[0] * K1_X + sen_val.theta_x_cpoint * K2_X + sen_val.dphi_[0] * K3_X + sen_val.theta_x_dot_cpoint * K4_X ) * -1;
 
   // Torque in the xz Planar --> T_y
-  virtual_torques[1] = (sen_val.phi_actual_[1] * K1 + sen_val.theta_y_cpoint * K2 + sen_val.dphi_[1] * K3 + sen_val.theta_y_dot_cpoint * K4 ) * -1;
+  virtual_torques[1] = (sen_val.phi_actual_[1] * K1_Y + sen_val.theta_y_cpoint * K2_Y + sen_val.dphi_[1] * K3_Y + sen_val.theta_y_dot_cpoint * K4_Y ) * -1;
 
   virtual_torques[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
@@ -294,8 +298,8 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   ctrl_val.T3 = real_torques[2];
 
   // Berechne Werte ohne Filter:
-  virtual_torques_ohne_Filter[0] = (sen_val.phi_actual_[0] * K1 + sen_val.theta_x_cpoint * K2 + sen_val.dphi_[0] * K3 + sen_val.theta_x_dot_cpoint * K4 ) * -1;
-  virtual_torques_ohne_Filter[1] = (sen_val.phi_actual_[1] * K1 + sen_val.theta_y_cpoint * K2 + sen_val.dphi_[1] * K3 + sen_val.theta_y_dot_cpoint * K4 ) * -1;
+  virtual_torques_ohne_Filter[0] = (sen_val.phi_actual_[0] * K1_X + sen_val.theta_x_cpoint * K2_X + sen_val.dphi_[0] * K3_X + sen_val.theta_x_dot_cpoint * K4_X ) * -1;
+  virtual_torques_ohne_Filter[1] = (sen_val.phi_actual_[1] * K1_Y + sen_val.theta_y_cpoint * K2_Y + sen_val.dphi_[1] * K3_Y + sen_val.theta_y_dot_cpoint * K4_Y ) * -1;
   virtual_torques_ohne_Filter[2] = 0.0; //(sen_val.theta_z_cpoint *  1.0 + sen_val.theta_z_dot_cpoint * 1.7055) * -1;
 
   real_torques_ohne_Filter[0] = 0.333333333 * (virtual_torques_ohne_Filter[2] + (2 / COS_ALPHA) * (virtual_torques_ohne_Filter[0] * COS_BETA - virtual_torques_ohne_Filter[1] * SIN_BETA));
@@ -321,13 +325,34 @@ void Controller::xyz_2D_controller(BallbotMotorDriver driver)
   int torque_offset = 10; // friction
   for (int i = 0; i < 3; i++)
   {
-    if (curr_unit_arr[i] > 0)
-    {
-      curr_unit_arr[i] += torque_offset;
+    if (i==1) {
+      if (curr_unit_arr[i] > 0)
+      {
+        curr_unit_arr[i] += 18;
+      }
+      else {
+      curr_unit_arr[i] -= 18;
+      }
     }
-    else {
-      curr_unit_arr[i] -= torque_offset;
+    else if (i==2) {
+      if (curr_unit_arr[i] > 0)
+      {
+        curr_unit_arr[i] += 25;
+      }
+      else {
+      curr_unit_arr[i] -= 25;
+      }
     }
+    else if (i==3) {
+      if (curr_unit_arr[i] > 0)
+      {
+        curr_unit_arr[i] += 23;
+      }
+      else {
+      curr_unit_arr[i] -= 23;
+      }
+    }
+    
   }
 
   //Load to motors
@@ -448,9 +473,9 @@ int *Controller::compute2currentunits(float real_torques_arr[]) {
 
   static int* ret_arr = new int[3];
 
-  ret_arr[0] = round(K_EXP * real_torques_arr[0]);
-  ret_arr[1] = round(K_EXP * real_torques_arr[1]);
-  ret_arr[2] = round(K_EXP * real_torques_arr[2]);
+  ret_arr[0] = round(K_M1 * real_torques_arr[0]);
+  ret_arr[1] = round(K_M2 * real_torques_arr[1]);
+  ret_arr[2] = round(K_M3 * real_torques_arr[2]);
 
   //  ret_arr[0] = static_cast<int>(K_EXP * real_torques_arr[0]);
   //  ret_arr[1] = static_cast<int>(K_EXP * real_torques_arr[1]);

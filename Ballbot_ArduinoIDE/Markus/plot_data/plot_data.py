@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("Motor_Torques.txt","r")
+    c=open("data4.txt","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
@@ -135,12 +135,46 @@ def print_torques(input_values):
 
     plt.show()
 
+def least_square_motor_factor():
+    #y=feature_vector*theta
+    gramm_to_Nm = 9.81*1e-3*0.12
+    #motor 1:
+    x_i = np.array([10,20,30,40,50,60,70,80,90,100])
+
+    m1 = np.array([[85,110,172,242,288,340,370,438,640,690],
+                   [65, 90, 170, 232, 280, 352, 375, 540, 600, 675]])
+
+    m2 = np.array([[39,121,260,320,385,410,445,480,595,680],
+                   [46, 128, 267, 310, 396, 435, 480, 480, 585, 680]])
+
+    m3 = np.array([[47,138,223,290,300,310,350,380,420,470],
+                   [91, 133, 196, 290, 242, 339, 356, 340, 450, 485]])
+
+    y_i = np.sum(m3,axis=0)*1/2*gramm_to_Nm
+    Phi = np.zeros((len(y_i),2))
+    for i in range(0,len(y_i)):
+        Phi[i,:]=np.array([1,x_i[i]])
+    tmp = np.dot(Phi.T,y_i)
+    Theta = np.dot(np.linalg.inv(np.dot(Phi.T,Phi)),tmp)
+    y_end = Theta[1]*110+Theta[0]
+    y_start = Theta[0]
+    name = "y="+str(np.round(Theta[1],6))+"* x "+str(np.round(Theta[0],6))
+    plt.plot([0,110],[y_start,y_end],label=name)
+    plt.scatter(x_i,y_i,label="M1 measurements", color='k')
+    plt.title("Motor 1, Units/Nm = "+str(np.round(1/Theta[1],2)))
+    plt.xlabel("Units")
+    plt.ylabel("Nm")
+    plt.legend()
+    plt.show()
+
 tmp = read_values()
-print_torques(tmp)
+#print_torques(tmp)
 #print_IMU_FILTER_TEST(tmp)
 #print_theta(tmp)
 #print_wheel(tmp)
-#compare_filter(tmp)
+compare_filter(tmp)
+
+#least_square_motor_factor()
 
 
 #Ergebnisse für leerlauf:

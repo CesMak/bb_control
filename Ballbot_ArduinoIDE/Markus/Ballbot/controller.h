@@ -12,23 +12,29 @@
 
 
 // Current Used Constants:
-#define SAMPL_TIME  7000      // in microseconds // if this value is low noise is increased!  // Dead time is around 7ms! of the motors
+#define SAMPL_TIME  7000     // in microseconds // if this value is low noise is increased!  // Dead time is around 7ms! of the motors
 #define FILTER_FAK  0.125     // ETHZ: 15 HZ rausfiltern das passt mit dem hier aber nicht überein! wenn wert auf 1 filter ist aus; für T=10ms & FilterFAK = 0.125 ca. 13HZ Cuttoff freq.
-#define USE_FILTER  false     // =true -> use filtered value to apply torques  =false -> use unfiltered gyro and angle values to apply torques.
-#define K_EXP       39        // torque to unit factor 11.11 (gemessen - Michi) 222.2 (errechnet aus Datenblatt) 4.5 mNm/u, gemessen Markus: 4.3 mNM/u
+#define USE_FILTER  true     // =true -> use filtered value to apply torques  =false -> use unfiltered gyro and angle values to apply torques.
+#define K_M1        125       // unit to torque factor (errechnet aus Datenblatt) 1/(4.5 mNm/u)=222
+#define K_M2        132
+#define K_M3        207    
 #define ALPHA       PI/4      // 45° ist nur von Konstruktion Abhängig sollte auf Ballgröße angepasst werden.
-#define BETA        0        // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
-#define K1          0         // tune phi_x, phi_y, set to zero if you do not wanna use the ball's odometry  -0.3162
-#define K2          -23.6105        // tune theta_x, theta_y, set to zero if you do not wanna use the ball's odometry
-#define K3          0         // tune dphi_x, dphi_y, set to zero if you do not wanna use the ball's odometry  -0.3991
-#define K4          -6.8470         // tune dtheta_x, dtheta_y, set to zero if you do not wanna use the ball's odometry
+#define BETA        0.0         // care this is correlated with the real wheel numbers! its teh angle from the x-axis of the IMU to the 1 real wheel
+#define K1_X        0         // tune phi_x, phi_y, set to zero if you do not wanna use the ball's odometry  -0.3162
+#define K2_X        -4.9174     // tune theta_x, theta_y, set to zero if you do not wanna use the ball's odometry
+#define K3_X         0         // tune dphi_x, dphi_y, set to zero if you do not wanna use the ball's odometry  -0.3991
+#define K4_X        -1.2960 // tune dtheta_x, dtheta_y, set to zero if you do not wanna use the ball's odometry
+#define K1_Y         0         // tune phi_x, phi_y, set to zero if you do not wanna use the ball's odometry  -0.3162
+#define K2_Y        -4.9174     // tune theta_x, theta_y, set to zero if you do not wanna use the ball's odometry
+#define K3_Y         0         // tune dphi_x, dphi_y, set to zero if you do not wanna use the ball's odometry  -0.3991
+#define K4_Y        -1.2960  // tune dtheta_x, dtheta_y, set to zero if you do not wanna use the ball's odometry
 #define COS_ALPHA   cos(ALPHA)       // in rad.
 #define SIN_ALPHA   sin(ALPHA)
 #define SIN_BETA    sin(BETA)
 #define COS_BETA    cos(BETA)
 #define SQRT3       1.73205080757
 #define PRINT_TORQUES true  // if print as torques if false pritn as units!
-#define USE_CUSTOM_OFFSET false  // use this offset!
+#define USE_CUSTOM_OFFSET false  // use this offset defined in the init method!
 #define RK         0.07    // radius of ball in meter
 #define RW         0.03    // radius of omni-wheel in meter
 //#define DEBUG_MARKUS
