@@ -1,0 +1,57 @@
+\documentclass[twoside,colorback,accentcolor=tud4c,11pt]{tudreport}
+%\usepackage{ngerman}
+\usepackage{german} %damit euro zeichen richtig
+\usepackage{eurosym}
+\usepackage[stable]{footmisc}
+\usepackage[ngerman,pdfview=FitH,pdfstartview=FitV]{hyperref}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{longtable}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{listings}
+\lstdefinestyle{BashInputStyle}{
+	language=bash,
+    basicstyle=\ttfamily,
+	%numbers=left,
+	%	numberstyle=\tiny,
+	%	numbersep=3pt,
+	frame=tb,
+	frameshape={RYR}{Y}{Y}{RYR},
+	columns=fullflexible,
+	backgroundcolor=\color{gray!20},
+	linewidth=0.95\linewidth,
+	xleftmargin=0.1\linewidth,
+  showspaces=false,
+showtabs=false,
+breaklines=true,
+showstringspaces=false,
+breakatwhitespace=true,
+belowskip=1.2em,
+aboveskip=1.2em,
+} 
+
+%defining a blue link:
+\newcommand{\mylink}[2] {	\href{#1}{	\textit{\textcolor{blue}{#2}}}}
+
+
+\newlength{\longtablewidth}
+\setlength{\longtablewidth}{0.675\linewidth}
+
+\title{Project Ballbot}
+\subtitle{Markus Lamprecht \\ Florian M\"uller \\ Michael Suffel}
+
+\institution{TU Darmstadt, RTM}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+
+\chapter{Aufnahmen mit Anfangsauslenkung $y_{0}=5^\circ$}
+\section{Ohne Rauschen und Verstärkungsvektor K_{1}}
+
+In den Abbildungen  \ref{fig:O1} und \ref{fig:02} sind zunächst die realen und virtuellen Drehmomente zusehen. 
+ 
+
+\end{document}

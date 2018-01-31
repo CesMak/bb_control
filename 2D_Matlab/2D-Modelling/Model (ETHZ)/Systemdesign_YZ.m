@@ -8,7 +8,7 @@ gamma=l*m_b+(r_s+r_w)*m_w;
 
 %Matrizen
 M_x=[m_tot*(r_s)^2+I_s+(r_s/r_w)^2*I_w, -(r_s/r_w^2)*r_tot*I_w+gamma*r_s*cos(theta_x);
-     -(r_s/r_w^2)*r_tot*I_w+gamma*r_s*cos(theta_x), r_tot^2/r_w^2*I_w+I_b+m_b*l^2+m_w*r_tot^2];
+     -(r_s/r_w^2)*r_tot*I_w+gamma*r_s*cos(theta_x), r_tot^2/r_w^2*I_w+I_b_x+m_b*l^2+m_w*r_tot^2];
  
 C_x=[-r_s*gamma*sin(theta_x)*(theta_x_dot)^2;
      0];
@@ -58,11 +58,11 @@ rank_B_yz = rank(M_B_yz);
 
 %Gewichtungsmatrizen für LQR-Regler festlegen
 
-Q_yz = [2 0 0 0; 
-        0 1000 0 0; 
-        0 0 10000000 0; 
-        0 0 0 50000000];
- R_yz = 20000000000;
+Q_yz = [20 0 0 0; 
+        0 100*q2_lqr 0 0; 
+        0 0 10*q3_lqr 0; 
+        0 0 0 50*q4_lqr];
+ R_yz = 200*r_lqr;
  
  [K_yz, S_yz, lamda_yz_closed] = lqr(A_yz, B_yz, Q_yz, R_yz);
  

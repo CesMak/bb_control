@@ -21,6 +21,12 @@ end
 
 
 %% Compute Model
+
+q2_lqr = 1; 
+q3_lqr = 1; 
+q4_lqr = 1; 
+r_lqr = 1000; 
+
 Systemdesign_YZ;
 Systemdesign_XZ;
 Systemdesign_XY;
