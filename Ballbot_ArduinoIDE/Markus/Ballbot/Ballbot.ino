@@ -20,7 +20,20 @@ void setup()
   controller.imu_init(imu, 100);
   motor_driver.init();
   Serial.println("End initialization");
+  Serial.println("++++++++++++++++++++++++++++++++++++++++++++++++++");
+  Serial.println(motor_driver.readServoConfig(1, 4, 44));
+  Serial.println(motor_driver.readServoConfig(2, 4, 44));
+  Serial.println(motor_driver.readServoConfig(3, 4, 44));
+  
+  Serial.println(motor_driver.readServoConfig(1, 4, 40));
+  Serial.println(motor_driver.readServoConfig(2, 4, 40));
+  Serial.println(motor_driver.readServoConfig(3, 4, 40));
 
+  Serial.println(motor_driver.readServoConfig(1, 2, 38));
+  Serial.println(motor_driver.readServoConfig(2, 2, 38));
+  Serial.println(motor_driver.readServoConfig(3, 2, 38));
+
+  Serial.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++");
   //motor_driver.referenzFahrt(); // required for odometry!
 
   //Change mode to current Control Mode:
