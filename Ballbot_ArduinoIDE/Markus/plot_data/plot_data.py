@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def read_values():
-    c=open("data4.txt","r")
+    c=open("IMU_offset_vergleich2.txt","r")
     return (np.loadtxt(c))
 
 def print_theta(input_values):
@@ -76,6 +76,10 @@ def compare_torque_with_and_without_filter(input_values):
 
 def compare_filter(input_values):
     f, axarr = plt.subplots(2, sharex=True)
+    print(np.mean(input_values[1100:1550,1]))
+    print(np.std(input_values[1100:1550,1]))
+    print(np.mean(input_values[1100:1550,3]))
+    print(np.std(input_values[1100:1550,3]))
     axarr[0].plot(input_values[:,0],input_values[:,1],label="theta_x_ohne_filter")
     axarr[0].plot(input_values[:,0],input_values[:,5],label="theta_x_mit_filter")
     axarr.flat[0].set(xlabel="t in sec", ylabel="°")
@@ -167,12 +171,26 @@ def least_square_motor_factor():
     plt.legend()
     plt.show()
 
+def michi_berechnung(input_values):
+    f, axarr = plt.subplots(2, sharex=True)
+    axarr[0].plot(input_values[:,0],input_values[:,1],label="theta_x_ohne_filter")
+    axarr[0].plot(input_values[:,0],input_values[:,5],label="theta_x_mit_filter")
+    axarr.flat[0].set(xlabel="t in sec", ylabel="°")
+    plt.title("Motor 1, Units/Nm = "+str(np.round(1/Theta[1],2)))
+    plt.xlabel("Units")
+    plt.ylabel("Nm")	    
+    plt.legend()
+    plt.show()
+
+
 tmp = read_values()
+michi_berechnung(tmp)
+
 #print_torques(tmp)
 #print_IMU_FILTER_TEST(tmp)
 #print_theta(tmp)
 #print_wheel(tmp)
-compare_filter(tmp)
+#compare_filter(tmp)
 
 #least_square_motor_factor()
 

@@ -12,7 +12,7 @@
 
 
 // Current Used Constants:
-#define SAMPL_TIME  7000     // in microseconds // if this value is low noise is increased!  // Dead time is around 7ms! of the motors
+#define SAMPL_TIME  10000     // in microseconds // if this value is low noise is increased!  // Dead time is around 7ms! of the motors
 #define FILTER_FAK  0.125     // ETHZ: 15 HZ rausfiltern das passt mit dem hier aber nicht überein! wenn wert auf 1 filter ist aus; für T=10ms & FilterFAK = 0.125 ca. 13HZ Cuttoff freq.
 #define USE_FILTER  true     // =true -> use filtered value to apply torques  =false -> use unfiltered gyro and angle values to apply torques.
 #define K_M1        125       // unit to torque factor (errechnet aus Datenblatt) 1/(4.5 mNm/u)=222
@@ -34,7 +34,7 @@
 #define COS_BETA    cos(BETA)
 #define SQRT3       1.73205080757
 #define PRINT_TORQUES true  // if print as torques if false pritn as units!
-#define USE_CUSTOM_OFFSET false  // use this offset defined in the init method!
+#define USE_CUSTOM_OFFSET true  // use this offset defined in the init method!
 #define RK         0.07    // radius of ball in meter
 #define RW         0.03    // radius of omni-wheel in meter
 //#define DEBUG_MARKUS
@@ -131,13 +131,16 @@ class Controller
 
     bool imu_init(cIMU sensor, int samples);
     void xy_plane2D_controller(BallbotMotorDriver driver);
-    void xyz_2D_controller(BallbotMotorDriver driver);
+
     void x_1D_controller(BallbotMotorDriver driver);
     void do_Step(BallbotMotorDriver driver);
     void test_IMU_FILTER(cIMU sensor);
-    void imu_Filter(cIMU sensor);
+
     float *torques_filter(float real_torques[], bool use_filter);
     void calc_odometry(int32_t velocity_RAW[]);
+    
+    void calc_values(BallbotMotorDriver driver);
+    void read_values(cIMU sensor);
 
 };
 

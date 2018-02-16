@@ -16,22 +16,25 @@ void setup()
   Serial.println("Start initialization");
   controller.init();
   imu.begin(); // update IMU with 200Hz = 5ms damit neuer wert != alter wert
-  //controller.test_IMU_FILTER(imu);
-  controller.imu_init(imu, 100);
   motor_driver.init();
   Serial.println("End initialization");
-
-  //motor_driver.referenzFahrt(); // required for odometry!
 
   //Change mode to current Control Mode:
   motor_driver.change_all_Modes(0);
   
   delay(1000);
-
-  // Dead Time analysis: 7ms
-  //controller.do_Step(motor_driver);
-  //delay(10000);
   
+//    int16_t angle[3];
+//  float   rpy[3];
+//  float   quat[4];
+//  int16_t gyroData[3];
+//  int16_t gyroRaw[3];
+//  int16_t accData[3];
+//  int16_t accRaw[3];
+//  int16_t magData[3];
+//  int16_t magRaw[3];
+
+
   Timer.stop();
   Timer.setPeriod(SAMPL_TIME);
   Timer.attachInterrupt(executeController);
@@ -47,7 +50,7 @@ void loop()
 
 void executeController(void)
 {
-    imu.update(); // do not put this command in readIMU !
+    imu.update(); //0.32ms do not put this command in readIMU !
     controller.readIMU(imu, motor_driver);
 }
 
